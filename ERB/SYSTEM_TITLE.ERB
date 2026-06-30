@@ -1,0 +1,1782 @@
+﻿; SYSTEM_TITLE.ERB
+; 自定义标题界面 
+; Edit 1.0
+
+@SYSTEM_TITLE
+
+$TITLE_SELECT
+
+REDRAW 0
+LOADGLOBAL
+CALL INIT_DISPLAY_SETTINGS
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+; ==================================================
+; 标题区：
+; ==================================================
+CALL APPLY_DISPLAY_SETTINGS
+DRAWLINE
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL                    ◇  E R A  _  A I  ◇
+PRINTL
+PRINTL                    - Text Adventure System -
+PRINTL
+PRINTL                    Ver 1.0 测试版
+PRINTL
+PRINTL                    创作者：Natepage
+ALIGNMENT LEFT
+DRAWLINE
+DRAWLINE
+
+; ==================================================
+; 菜单区：
+; ==================================================
+PRINTL                [0] 开始新游戏     New Game      [从第一天开始，进入新的故事流程]
+PRINTL                [1] 读取存档         Continue         [载入已有进度，继续上次的游戏]
+PRINTL                [2] 游戏说明         Guide              [查看基础玩法、配置要求、更新内容]
+PRINTL                [3] 设置                Options           [调整显示、系统流程、AI相关选项]
+PRINTL                [4] 关于                About              [查看项目版本、制作信息、开发目标]
+PRINTL                [9] 退出游戏         Exit                  [关闭程序并返回桌面]
+
+; ==================================================
+; 输入处理
+; ==================================================
+$TITLE_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        DRAWLINE
+        RESETDATA
+        BEGIN FIRST
+; 调用新游戏入口 @EVENTFIRST
+
+    CASE 1
+	CLEARLINE LINECOUNT
+        LOADGAME
+; 调用自带的加载存档功能（底下的日文不好改）
+        GOTO TITLE_SELECT
+
+    CASE 2
+        CALL TITLE_HELP
+        GOTO TITLE_SELECT
+
+    CASE 3
+        CALL TITLE_SETTING
+        GOTO TITLE_SELECT
+
+    CASE 4
+        CALL TITLE_ABOUT
+        GOTO TITLE_SELECT
+
+    CASE 9
+        CALL TITLE_EXIT_CONFIRM
+        GOTO TITLE_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_INPUT
+ENDSELECT
+
+; ==================================================
+; 游戏说明页面
+; ==================================================
+@TITLE_HELP
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 游戏说明 / Game Guide
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 本页面用于说明当前版本的基础玩法、配置要求和已完成内容。
+DRAWLINE
+PRINTL   本项目是一个基于 Era / Emuera 风格制作的文字游戏。游戏以文本叙事、菜单选择和数值变化作为主要表现方式。
+PRINTL   玩家将在简洁的文字界面中推进流程，
+PRINTL   通过不同选择影响角色状态、事件发展和后续剧情。
+DRAWLINE
+PRINTL 当前更新内容
+PRINTL   ・已加入测试剧本“雨夜房间”
+DRAWLINE
+PRINTL 配置要求
+PRINTL
+PRINTL   运行环境：
+PRINTL     ・操作系统：Windows 10 / Windows 11，建议使用 64 位系统
+PRINTL     ・运行器：Emuera / Emuera.NET
+PRINTL     ・运行库：若使用 Emuera.NET，需要安装 .NET Desktop Runtime x64
+PRINTL     ・文件编码：建议 ERB / CSV 文件使用 UTF-8 with BOM
+PRINTL
+PRINTL   需求配置：
+PRINTL     ・CPU：建议 6 核 12 线程及以上
+PRINTL     ・内存：建议 32GB 以上，推荐 64GB
+PRINTL     ・显卡：建议 NVIDIA 显卡，显存 8GB 以上
+PRINTL     ・硬盘空间：建议额外预留 50GB 以上用于模型文件
+PRINTL     ・运行方式：可使用本地 AI 模型，也可连接外部 AI 服务
+PRINTL
+PRINTL   推荐配置：
+PRINTL     ・CPU：Ryzen 7 / Core i7 级别及以上
+PRINTL     ・内存：64GB
+PRINTL     ・显卡：RTX 4070 8GB 或更高
+PRINTL     ・硬盘空间：建议预留 100GB 以上
+PRINTL
+PRINTL   说明：
+PRINTL     ・仅游玩基础文字内容时，不需要高配置（作者不会更新无AI版本，需自行修改）
+PRINTL     ・启用本地 AI 对话后，模型大小会直接影响速度和内存占用
+PRINTL     ・较小模型响应更快，较大模型角色表现和上下文稳定性更好
+PRINTL     ・如果使用外部 AI 服务，本机配置要求会明显降低
+DRAWLINE
+PRINTL [0] 返回标题
+
+$TITLE_HELP_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回标题。
+    GOTO TITLE_HELP_INPUT
+ENDIF
+
+; ==================================================
+; 设置页面
+; ==================================================
+@TITLE_SETTING
+
+$TITLE_SETTING_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 设置 / Options
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 本页面用于管理游戏显示、系统流程和 AI 对话等相关选项。
+DRAWLINE
+
+PRINTFORM 显示设置     [文本：
+CALL PRINT_TEXT_COLOR_NAME
+PRINTFORM  / 背景：
+CALL PRINT_BG_COLOR_NAME
+PRINTL ]
+
+PRINTFORM [1] 文本颜色        当前：
+CALL PRINT_TEXT_COLOR_NAME
+PRINTL
+
+PRINTFORM [2] 背景颜色        当前：
+CALL PRINT_BG_COLOR_NAME
+PRINTL
+
+PRINTL [3] 字体样式        当前：请在 emuera.config 中修改
+PRINTL [4] 字体大小        当前：请在 emuera.config 中修改
+PRINTL [5] 行距设置        当前：请在 emuera.config 中修改
+
+DRAWLINE
+; ==================================================
+; 游戏设置区
+; 说明：
+;   当前这里负责“设置开关”的显示与保存。
+;   自动存档和返回确认已经接入主流程。
+;
+;   GLOBAL:300 自动存档
+;       1 = 开，0 = 关
+;       当前在雨夜房间每轮对话结束后调用自动存档，写入 99 号槽位。
+;
+;   GLOBAL:301 返回确认
+;       1 = 开，0 = 关
+;       当前已经接入“退出游戏”“返回标题”等确认流程。
+; ==================================================
+PRINTFORM 游戏设置     [自动存档：
+CALL PRINT_AUTOSAVE_NAME
+PRINTFORM  / 返回确认：
+CALL PRINT_RETURN_CONFIRM_NAME
+PRINTL ]
+
+PRINTFORM [6] 自动存档        当前：
+CALL PRINT_AUTOSAVE_NAME
+PRINTL
+
+PRINTFORM [7] 返回确认        当前：
+CALL PRINT_RETURN_CONFIRM_NAME
+PRINTL
+
+DRAWLINE
+; ==================================================
+; AI 对话设置区
+; 说明：
+;   本项目默认启用 AI，因此不设置“AI 开关”。
+;   当前这里负责 AI 参数的显示、保存，并读取 AI Bridge 写出的模型状态。
+;   AI 通信测试页已经接入 AI Bridge，可以通过 GX / mock / OpenAI 后端返回回复。
+;   正式剧本对话已接入雨夜房间；长期记忆由 AI Bridge 写入 cache 文件夹。
+;
+;   GLOBAL:400 模型来源
+;       0 = 本地，1 = 外部服务
+;       注意：真实后端 mock / gx / openai 由 AI/AI_CONFIG.txt 中的 MODEL_SOURCE 决定。
+;
+;   GLOBAL:401 模型名称状态
+;       当前显示值由 AI/model_name.txt 提供。
+;       该文件由 AI/ai_bridge.py 根据 AI_CONFIG.txt 自动写入。
+;
+;   GLOBAL:402 回复上限 Token
+;       控制 AI 单次回复最多生成多少 Token。
+;       AI Bridge 已读取该值，用于控制本次模型回复上限。
+;
+;   GLOBAL:403 记忆容量 Token
+;       控制每次 AI 对话最多读取多少 Token 的角色记忆、事件摘要、关系变化等内容。
+;       当前已经传给 AI Bridge，并用于裁剪 cache 长期记忆与历史摘录。
+;       0 表示不读取长期记忆。
+;
+;   GLOBAL:404 对话风格
+;       控制 AI 回复时的语气、描写密度和表达方式。
+;       AI Bridge 已读取该值，并会转换成对应风格提示词。
+; ==================================================
+PRINTFORM AI 对话设置     [来源：
+CALL PRINT_AI_MODEL_SOURCE_NAME
+PRINTFORM  / 模型：
+CALL PRINT_AI_MODEL_NAME
+PRINTFORM  / 回复上限：
+CALL PRINT_AI_REPLY_LIMIT_NAME
+PRINTFORM  / 记忆容量：
+CALL PRINT_AI_MEMORY_LIMIT_NAME
+PRINTFORM  / 风格：
+CALL PRINT_AI_STYLE_NAME
+PRINTL ]
+
+PRINTFORM [8] 模型来源        当前：
+CALL PRINT_AI_MODEL_SOURCE_NAME
+PRINTL
+
+PRINTFORM      模型名称        当前：
+CALL PRINT_AI_MODEL_NAME
+PRINTL
+
+PRINTFORM [9] 回复上限        当前：
+CALL PRINT_AI_REPLY_LIMIT_NAME
+PRINTL
+
+PRINTFORM [10] 记忆容量       当前：
+CALL PRINT_AI_MEMORY_LIMIT_NAME
+PRINTL
+
+PRINTFORM [11] 对话风格       当前：
+CALL PRINT_AI_STYLE_NAME
+PRINTL
+
+PRINTL [12] AI 通信测试        当前：调试入口
+
+DRAWLINE
+PRINTL [0] 返回标题
+
+$TITLE_SETTING_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        CALL TITLE_SETTING_TEXT_COLOR
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 2
+        CALL TITLE_SETTING_BG_COLOR
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 3
+        CALL TITLE_SETTING_FONT_NAME
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 4
+        CALL TITLE_SETTING_FONT_SIZE
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 5
+        CALL TITLE_SETTING_LINE_HEIGHT
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 6
+;       自动存档开关
+;       自动存档开关。
+;       当前已接入雨夜房间：每轮对话结束后判断 GLOBAL:300。
+        IF GLOBAL:300 == 1
+            GLOBAL:300 = 0
+        ELSE
+            GLOBAL:300 = 1
+        ENDIF
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 7
+;       返回确认开关
+;       返回确认开关。
+;       当前已接入退出游戏、剧本选择返回、雨夜房间返回标题。
+        IF GLOBAL:301 == 1
+            GLOBAL:301 = 0
+        ELSE
+            GLOBAL:301 = 1
+        ENDIF
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 8
+;       模型来源说明
+;       真实后端由 AI/AI_CONFIG.txt 决定。
+;       AI Bridge 会写出 AI/model_source.txt 和 AI/model_name.txt 供设置页显示。
+        CALL TITLE_SETTING_AI_MODEL_INFO
+        GOTO TITLE_SETTING_SELECT
+
+
+    CASE 9
+;       回复上限 Token 设置
+;       点进去说明后手动输入。
+;       当前保存的数值已经会写入 AI 请求，并由 AI Bridge 用于控制回复上限。
+        CALL TITLE_SETTING_AI_REPLY_LIMIT
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 10
+;       记忆容量 Token 设置
+;       点进去说明后手动输入。
+;       当前保存的数值已经会写入 AI 请求。
+;       长期记忆库已由 AI Bridge 接入，保存在游戏根目录 cache 文件夹中。
+        CALL TITLE_SETTING_AI_MEMORY_LIMIT
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 11
+;       对话风格设置
+;       点进去选择具体风格。
+;       当前保存的风格已经会写入 AI 请求，并由 AI Bridge 转换成风格提示词。
+        CALL TITLE_SETTING_AI_STYLE
+        GOTO TITLE_SETTING_SELECT
+
+    CASE 12
+;       AI 通信测试
+;       AI 通信测试。
+;       当前已经支持：玩家输入 → 写入请求 → AI Bridge 自动处理 → 读取回复。
+;       正式剧本对话入口已经在“雨夜房间”中接入。
+        CALL TITLE_SETTING_AI_TEST
+        GOTO TITLE_SETTING_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_SETTING_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 显示设置初始化
+; GLOBAL:200 文本颜色  0默认 1柔和白 2淡青色 3暖白色 4自定义RGB
+; GLOBAL:201 背景颜色  0默认 1深色 2蓝黑色 3自定义RGB
+; GLOBAL:210 文本颜色R
+; GLOBAL:211 文本颜色G
+; GLOBAL:212 文本颜色B
+; GLOBAL:220 背景颜色R
+; GLOBAL:221 背景颜色G
+; GLOBAL:222 背景颜色B
+;
+; 游戏设置：
+; GLOBAL:300 自动存档  0关 1开
+;   当前已经接入主流程。雨夜房间对话结束后会调用 GAME_AUTOSAVE。
+;
+; GLOBAL:301 返回确认  0关 1开
+;   当前已经接入退出游戏、剧本选择返回、雨夜房间返回标题等流程。
+;
+; AI 对话设置：
+; GLOBAL:400 模型来源  0本地 1外部服务
+;   游戏内不直接切换真实后端。真实后端由 AI/AI_CONFIG.txt 决定。
+;
+; GLOBAL:401 模型名称状态
+;   当前由 AI/model_name.txt 显示真实模型名称。
+;
+; GLOBAL:402 回复上限 Token
+;   当前已经写入请求，并由 AI Bridge 用于 max_tokens。
+;
+; GLOBAL:403 记忆容量 Token
+;   当前已经写入请求，并由 AI Bridge 用于控制长期记忆读取上限。
+;
+; GLOBAL:404 对话风格
+;   当前已经写入请求，并由 AI Bridge 转换成风格提示词。
+;
+; 初始化标记：
+; GLOBAL:900 显示设置初始化标记
+; GLOBAL:901 自动存档初始化标记
+; GLOBAL:902 返回确认初始化标记
+; GLOBAL:904 AI设置初始化标记
+; ==================================================
+@INIT_DISPLAY_SETTINGS
+
+IF GLOBAL:900 == 0
+    GLOBAL:200 = 0
+    GLOBAL:201 = 0
+
+    GLOBAL:210 = 245
+    GLOBAL:211 = 235
+    GLOBAL:212 = 220
+
+    GLOBAL:220 = 15
+    GLOBAL:221 = 15
+    GLOBAL:222 = 18
+
+    GLOBAL:900 = 1
+    SAVEGLOBAL
+ENDIF
+
+IF GLOBAL:901 == 0
+;   默认开启自动存档开关。
+;   注意：这里还不会真正自动保存，只是设置默认状态。
+    GLOBAL:300 = 1
+    GLOBAL:901 = 1
+    SAVEGLOBAL
+ENDIF
+
+IF GLOBAL:902 == 0
+;   默认开启返回确认开关。
+;   注意：这里还不会真正弹出确认，只是设置默认状态。
+    GLOBAL:301 = 1
+    GLOBAL:902 = 1
+    SAVEGLOBAL
+ENDIF
+
+IF GLOBAL:904 == 0
+;   默认初始化 AI 对话设置。
+;   注意：这里还不会真正调用 AI，只是设置默认状态。
+    GLOBAL:400 = 0
+    GLOBAL:401 = 0
+    GLOBAL:402 = 512
+    GLOBAL:403 = 1024
+    GLOBAL:404 = 0
+
+    GLOBAL:904 = 1
+    SAVEGLOBAL
+ENDIF
+
+RETURN
+
+
+
+; ==================================================
+; 应用显示设置
+; ==================================================
+@APPLY_DISPLAY_SETTINGS
+
+; 背景颜色
+SELECTCASE GLOBAL:201
+    CASE 0
+        RESETBGCOLOR
+
+    CASE 1
+        SETBGCOLOR 15, 15, 18
+
+    CASE 2
+        SETBGCOLOR 10, 18, 30
+
+    CASE 3
+        SETBGCOLOR GLOBAL:220, GLOBAL:221, GLOBAL:222
+
+    CASEELSE
+        RESETBGCOLOR
+ENDSELECT
+
+; 文本颜色
+SELECTCASE GLOBAL:200
+    CASE 0
+        RESETCOLOR
+
+    CASE 1
+        SETCOLOR 220, 220, 220
+
+    CASE 2
+        SETCOLOR 180, 240, 255
+
+    CASE 3
+        SETCOLOR 245, 235, 220
+
+    CASE 4
+        SETCOLOR GLOBAL:210, GLOBAL:211, GLOBAL:212
+
+    CASEELSE
+        RESETCOLOR
+ENDSELECT
+
+RETURN
+
+
+
+; ==================================================
+; 文本颜色名称显示
+; ==================================================
+@PRINT_TEXT_COLOR_NAME
+
+SELECTCASE GLOBAL:200
+    CASE 0
+        PRINTFORM 默认
+
+    CASE 1
+        PRINTFORM 柔和白
+
+    CASE 2
+        PRINTFORM 淡青色
+
+    CASE 3
+        PRINTFORM 暖白色
+
+    CASE 4
+        PRINTFORM 自定义RGB({GLOBAL:210},{GLOBAL:211},{GLOBAL:212})
+
+    CASEELSE
+        PRINTFORM 默认
+ENDSELECT
+
+RETURN
+
+
+
+; ==================================================
+; 背景颜色名称显示
+; ==================================================
+@PRINT_BG_COLOR_NAME
+
+SELECTCASE GLOBAL:201
+    CASE 0
+        PRINTFORM 默认
+
+    CASE 1
+        PRINTFORM 深色
+
+    CASE 2
+        PRINTFORM 蓝黑色
+
+    CASE 3
+        PRINTFORM 自定义RGB({GLOBAL:220},{GLOBAL:221},{GLOBAL:222})
+
+    CASEELSE
+        PRINTFORM 默认
+ENDSELECT
+
+RETURN
+
+
+
+; ==================================================
+; 自动存档状态显示
+; ==================================================
+@PRINT_AUTOSAVE_NAME
+
+IF GLOBAL:300 == 1
+    PRINTFORM 开
+ELSE
+    PRINTFORM 关
+ENDIF
+
+RETURN
+
+
+
+; ==================================================
+; 返回确认状态显示
+; ==================================================
+@PRINT_RETURN_CONFIRM_NAME
+
+IF GLOBAL:301 == 1
+    PRINTFORM 开
+ELSE
+    PRINTFORM 关
+ENDIF
+
+RETURN
+
+
+
+; ==================================================
+; AI 模型来源显示
+; ==================================================
+@PRINT_AI_MODEL_SOURCE_NAME
+
+; 优先读取 AI Bridge 写出的真实模型来源。
+LOADTEXT "AI/model_source.txt", 0, 1
+
+IF RESULTS:0 != ""
+    PRINTFORM %RESULTS:0%
+    RETURN
+ENDIF
+
+; 如果 AI Bridge 尚未启动，回退显示界面默认分类。
+SELECTCASE GLOBAL:400
+    CASE 0
+        PRINTFORM 本地
+    CASE 1
+        PRINTFORM 外部服务
+    CASEELSE
+        PRINTFORM 未读取
+ENDSELECT
+
+RETURN
+
+
+
+; ==================================================
+; AI 模型名称显示
+; ==================================================
+@PRINT_AI_MODEL_NAME
+
+; 优先读取 AI Bridge 写出的真实模型名称。
+LOADTEXT "AI/model_name.txt", 0, 1
+
+IF RESULTS:0 != ""
+    PRINTFORM %RESULTS:0%
+    RETURN
+ENDIF
+
+PRINTFORM 未读取
+
+RETURN
+
+
+
+; ==================================================
+; AI 模型来源说明页面
+; ==================================================
+@TITLE_SETTING_AI_MODEL_INFO
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 模型来源 / Model Source
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTFORM 当前模型来源：
+CALL PRINT_AI_MODEL_SOURCE_NAME
+PRINTL
+
+PRINTFORM 当前模型名称：
+CALL PRINT_AI_MODEL_NAME
+PRINTL
+
+DRAWLINE
+PRINTL 说明：
+PRINTL   当前真实后端不由游戏内菜单直接切换。
+PRINTL   它由 AI/AI_CONFIG.txt 中的 MODEL_SOURCE 决定。
+PRINTL
+PRINTL   AI Bridge 启动后，会自动写出：
+PRINTL     ・AI/model_source.txt
+PRINTL     ・AI/model_name.txt
+PRINTL     ・AI/model_status.txt
+PRINTL
+PRINTL   设置页会读取这些文件并显示当前后端。
+DRAWLINE
+PRINTL 常见配置：
+PRINTL   MODEL_SOURCE=mock      纯测试
+PRINTL   MODEL_SOURCE=gx        使用 GX / vLLM 服务
+PRINTL   MODEL_SOURCE=openai    使用 OpenAI API
+DRAWLINE
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_AI_MODEL_INFO_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回设置页面。
+    GOTO TITLE_SETTING_AI_MODEL_INFO_INPUT
+ENDIF
+
+
+
+; ==================================================
+; AI 回复上限 Token 显示
+; ==================================================
+@PRINT_AI_REPLY_LIMIT_NAME
+
+PRINTFORM {GLOBAL:402} Token
+
+RETURN
+
+
+
+; ==================================================
+; AI 记忆容量 Token 显示
+; ==================================================
+@PRINT_AI_MEMORY_LIMIT_NAME
+
+PRINTFORM {GLOBAL:403} Token
+
+RETURN
+
+
+
+; ==================================================
+; AI 对话风格显示
+; ==================================================
+@PRINT_AI_STYLE_NAME
+
+SELECTCASE GLOBAL:404
+    CASE 0
+        PRINTFORM 标准
+    CASE 1
+        PRINTFORM 简洁
+    CASE 2
+        PRINTFORM 细腻
+    CASE 3
+        PRINTFORM 活泼
+    CASE 4
+        PRINTFORM 冷淡
+    CASE 5
+        PRINTFORM 温柔
+    CASE 6
+        PRINTFORM 幽默
+    CASE 7
+        PRINTFORM 严肃
+    CASE 8
+        PRINTFORM 沉稳
+    CASE 9
+        PRINTFORM 文学化
+    CASEELSE
+        PRINTFORM 标准
+ENDSELECT
+
+RETURN
+
+
+
+; ==================================================
+; 文本颜色设置页面
+; ==================================================
+@TITLE_SETTING_TEXT_COLOR
+
+$TITLE_SETTING_TEXT_COLOR_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+
+ALIGNMENT CENTER
+PRINTL 文本颜色设置 / Text Color
+ALIGNMENT LEFT
+
+DRAWLINE
+PRINTFORM 当前文本颜色：
+CALL PRINT_TEXT_COLOR_NAME
+PRINTL
+DRAWLINE
+PRINTL [1] 默认
+PRINTL [2] 柔和白       RGB(220,220,220)
+PRINTL [3] 淡青色       RGB(180,240,255)
+PRINTL [4] 暖白色       RGB(245,235,220)
+PRINTL [5] 自定义 RGB
+PRINTL
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_TEXT_COLOR_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        GLOBAL:200 = 0
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_TEXT_COLOR_SELECT
+
+    CASE 2
+        GLOBAL:200 = 1
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_TEXT_COLOR_SELECT
+
+    CASE 3
+        GLOBAL:200 = 2
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_TEXT_COLOR_SELECT
+
+    CASE 4
+        GLOBAL:200 = 3
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_TEXT_COLOR_SELECT
+
+    CASE 5
+        CALL INPUT_TEXT_RGB
+        GOTO TITLE_SETTING_TEXT_COLOR_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_SETTING_TEXT_COLOR_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 背景颜色设置页面
+; ==================================================
+@TITLE_SETTING_BG_COLOR
+
+$TITLE_SETTING_BG_COLOR_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+
+ALIGNMENT CENTER
+PRINTL 背景颜色设置 / Background Color
+ALIGNMENT LEFT
+
+DRAWLINE
+PRINTFORM 当前背景颜色：
+CALL PRINT_BG_COLOR_NAME
+PRINTL
+DRAWLINE
+PRINTL [1] 默认
+PRINTL [2] 深色         RGB(15,15,18)
+PRINTL [3] 蓝黑色       RGB(10,18,30)
+PRINTL [4] 自定义 RGB
+PRINTL
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_BG_COLOR_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        GLOBAL:201 = 0
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_BG_COLOR_SELECT
+
+    CASE 2
+        GLOBAL:201 = 1
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_BG_COLOR_SELECT
+
+    CASE 3
+        GLOBAL:201 = 2
+        SAVEGLOBAL
+        GOTO TITLE_SETTING_BG_COLOR_SELECT
+
+    CASE 4
+        CALL INPUT_BG_RGB
+        GOTO TITLE_SETTING_BG_COLOR_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_SETTING_BG_COLOR_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 字体样式说明页面
+; ==================================================
+@TITLE_SETTING_FONT_NAME
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 字体样式 / Font
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 当前版本不能在游戏内直接切换字体样式，需要通过游戏根目录下的 emuera.config 文件修改。
+DRAWLINE
+PRINTL 修改方法
+PRINTL
+PRINTL   打开游戏根目录下的 emuera.config。
+PRINTL   找到字体名称相关配置项：フォント名:微软雅黑
+PRINTL   将冒号后面的字体名改成你想使用的字体。
+DRAWLINE
+PRINTL 推荐字体
+PRINTL   ・Microsoft YaHei UI
+PRINTL   ・微软雅黑
+PRINTL   ・SimSun
+DRAWLINE
+PRINTL 注意事项
+PRINTL   ・字体名称必须是 Windows 系统中已经安装的字体。
+PRINTL   ・如果字体名写错，可能会回退为默认字体。
+PRINTL   ・修改后需要重新启动 Emuera 才会生效。
+DRAWLINE
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_FONT_NAME_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回设置页面。
+    GOTO TITLE_SETTING_FONT_NAME_INPUT
+ENDIF
+
+
+
+; ==================================================
+; 字体大小说明页面
+; ==================================================
+@TITLE_SETTING_FONT_SIZE
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 字体大小 / Font Size
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 当前版本不能在游戏内直接修改字体大小，需要通过游戏根目录下的 emuera.config 文件修改。
+DRAWLINE
+PRINTL 修改方法
+PRINTL
+PRINTL   打开游戏根目录下的 emuera.config。
+PRINTL   找到字体大小相关配置项：フォントサイズ:24
+PRINTL   将冒号后面的数字改成你想使用的字体大小。
+DRAWLINE
+PRINTL 推荐数值
+PRINTL   ・フォントサイズ:22    显示内容更多，适合小窗口。
+PRINTL   ・フォントサイズ:24    当前推荐值，显示较清晰。
+PRINTL   ・フォントサイズ:26    字体更大，但一屏显示内容会变少。
+DRAWLINE
+PRINTL 注意事项
+PRINTL   ・字体越大，一屏显示的内容越少。
+PRINTL   ・修改字体大小后，建议同步调整 一行の高さ。
+PRINTL   ・修改后需要重新启动 Emuera 才会生效。
+DRAWLINE
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_FONT_SIZE_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回设置页面。
+    GOTO TITLE_SETTING_FONT_SIZE_INPUT
+ENDIF
+
+
+
+; ==================================================
+; 行距设置说明页面
+; ==================================================
+@TITLE_SETTING_LINE_HEIGHT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 行距设置 / Line Height
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 当前版本不能在游戏内直接修改行距，需要通过游戏根目录下的 emuera.config 文件修改。
+DRAWLINE
+PRINTL 修改方法
+PRINTL
+PRINTL   打开游戏根目录下的 emuera.config。
+PRINTL   找到一行高度相关配置项：一行の高さ:32
+PRINTL   将冒号后面的数字改成你想使用的行高。
+DRAWLINE
+PRINTL 推荐组合
+PRINTL   ・フォントサイズ:22    一行の高さ:30
+PRINTL   ・フォントサイズ:24    一行の高さ:32
+PRINTL   ・フォントサイズ:26    一行の高さ:34
+DRAWLINE
+PRINTL 注意事项
+PRINTL   ・一行の高さ 控制每一行文本占用的高度。
+PRINTL   ・数值太小，文字可能被上下裁切。
+PRINTL   ・数值太大，界面会变得比较稀疏。
+PRINTL   ・修改后需要重新启动 Emuera 才会生效。
+DRAWLINE
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_LINE_HEIGHT_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回设置页面。
+    GOTO TITLE_SETTING_LINE_HEIGHT_INPUT
+ENDIF
+
+
+
+; ==================================================
+; AI 回复上限 Token 设置页面
+; ==================================================
+@TITLE_SETTING_AI_REPLY_LIMIT
+
+$TITLE_SETTING_AI_REPLY_LIMIT_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 回复上限设置 / Output Tokens
+ALIGNMENT LEFT
+DRAWLINE
+PRINTFORM 当前回复上限：
+CALL PRINT_AI_REPLY_LIMIT_NAME
+PRINTL
+DRAWLINE
+PRINTL 说明：
+PRINTL   回复上限用于控制 AI 单次回答最多生成多少 Token。
+PRINTL   数值越小，回复越短，速度更快。
+PRINTL   数值越大，回复越长，描写更充分，但速度会变慢。
+PRINTL
+PRINTL 建议参考：
+PRINTL   128 Token     适合很短的即时对话
+PRINTL   512 Token     适合普通角色对话
+PRINTL   1024 Token    适合较长剧情描写
+PRINTL   2048 Token    适合长段剧情或复杂事件
+DRAWLINE
+PRINTL [1] 输入新的回复上限
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_AI_REPLY_LIMIT_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        DRAWLINE
+        PRINTL 请输入新的回复上限 Token。
+        PRINTL 范围：64 到 4096。
+        INPUT
+        IF RESULT < 64 || RESULT > 4096
+            CLEARLINE 1
+            REUSELASTLINE 数值无效，请输入 64 到 4096。
+            GOTO TITLE_SETTING_AI_REPLY_LIMIT_SELECT
+        ENDIF
+
+        GLOBAL:402 = RESULT
+        SAVEGLOBAL
+        RETURN
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_SETTING_AI_REPLY_LIMIT_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; AI 记忆容量 Token 设置页面
+; ==================================================
+@TITLE_SETTING_AI_MEMORY_LIMIT
+
+$TITLE_SETTING_AI_MEMORY_LIMIT_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 记忆容量设置 / Memory Tokens
+ALIGNMENT LEFT
+DRAWLINE
+PRINTFORM 当前记忆容量：
+CALL PRINT_AI_MEMORY_LIMIT_NAME
+PRINTL
+DRAWLINE
+PRINTL 说明：
+PRINTL   记忆容量用于控制每次 AI 对话最多读取多少 Token 的角色记忆内容。
+PRINTL   它不是 AI 回复长度，而是放进输入上下文中的记忆内容上限。
+PRINTL
+PRINTL   记忆内容可以包括：
+PRINTL     ・角色基础设定
+PRINTL     ・玩家与角色的关系变化
+PRINTL     ・最近发生的重要事件
+PRINTL     ・过去对话的摘要
+PRINTL     ・角色对玩家的印象
+PRINTL
+PRINTL   数值越大，AI 能读取的过去信息越多，连续性越强。
+PRINTL   但数值过大也会增加上下文占用，速度可能变慢。
+PRINTL
+PRINTL 建议参考：
+PRINTL   0 Token       不读取长期记忆
+PRINTL   512 Token     读取少量关键记忆
+PRINTL   1024 Token    默认推荐值
+PRINTL   2048 Token    读取较多事件和关系信息
+PRINTL   4096 Token    适合复杂长期剧情
+DRAWLINE
+PRINTL [1] 输入新的记忆容量
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_AI_MEMORY_LIMIT_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        DRAWLINE
+        PRINTL 请输入新的记忆容量 Token。
+        PRINTL 范围：0 到 8192。
+        PRINTL 0 表示不读取长期记忆。
+        INPUT
+        IF RESULT < 0 || RESULT > 8192
+            CLEARLINE 1
+            REUSELASTLINE 数值无效，请输入 0 到 8192。
+            GOTO TITLE_SETTING_AI_MEMORY_LIMIT_SELECT
+        ENDIF
+
+        GLOBAL:403 = RESULT
+        SAVEGLOBAL
+        RETURN
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_SETTING_AI_MEMORY_LIMIT_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; AI 对话风格设置页面
+; ==================================================
+@TITLE_SETTING_AI_STYLE
+
+$TITLE_SETTING_AI_STYLE_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 对话风格设置 / Dialogue Style
+ALIGNMENT LEFT
+DRAWLINE
+PRINTFORM 当前对话风格：
+CALL PRINT_AI_STYLE_NAME
+PRINTL
+DRAWLINE
+PRINTL 对话风格用于影响 AI 的语气、描写密度和表达方式。
+PRINTL 当前设置会写入 AI 请求，并由 AI Bridge 转换成对应风格提示词。
+DRAWLINE
+PRINTL [1] 标准      默认风格，语气自然，描述适中
+PRINTL [2] 简洁      回复更短，减少描写
+PRINTL [3] 细腻      增加心理、动作和氛围描写
+PRINTL [4] 活泼      语气更轻快，表达更有活力
+PRINTL [5] 冷淡      语气克制，情绪表达较少
+PRINTL [6] 温柔      语气柔和，更照顾玩家感受
+PRINTL [7] 幽默      适当加入轻松和调侃
+PRINTL [8] 严肃      语气正式，减少玩笑
+PRINTL [9] 沉稳      节奏较慢，表达更稳定
+PRINTL [10] 文学化   增加叙事感和文字表现力
+PRINTL
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_AI_STYLE_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        GLOBAL:404 = 0
+        SAVEGLOBAL
+        RETURN
+
+    CASE 2
+        GLOBAL:404 = 1
+        SAVEGLOBAL
+        RETURN
+
+    CASE 3
+        GLOBAL:404 = 2
+        SAVEGLOBAL
+        RETURN
+
+    CASE 4
+        GLOBAL:404 = 3
+        SAVEGLOBAL
+        RETURN
+
+    CASE 5
+        GLOBAL:404 = 4
+        SAVEGLOBAL
+        RETURN
+
+    CASE 6
+        GLOBAL:404 = 5
+        SAVEGLOBAL
+        RETURN
+
+    CASE 7
+        GLOBAL:404 = 6
+        SAVEGLOBAL
+        RETURN
+
+    CASE 8
+        GLOBAL:404 = 7
+        SAVEGLOBAL
+        RETURN
+
+    CASE 9
+        GLOBAL:404 = 8
+        SAVEGLOBAL
+        RETURN
+
+    CASE 10
+        GLOBAL:404 = 9
+        SAVEGLOBAL
+        RETURN
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_SETTING_AI_STYLE_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 输入自定义文本 RGB
+; ==================================================
+@INPUT_TEXT_RGB
+
+$INPUT_TEXT_RGB_START
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 自定义文本颜色 / Text RGB
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL
+PRINTL 请输入文本颜色 RGB 数值。
+PRINTL 需要依次输入 R、G、B，每个数值范围为 0 到 255。
+PRINTL
+PRINTL 示例：
+PRINTL   暖白色：245, 235, 220
+PRINTL   淡青色：180, 240, 255
+PRINTL   纯白色：255, 255, 255
+PRINTL
+DRAWLINE
+
+PRINTL 请输入 R：
+INPUT
+LOCAL:0 = RESULT
+IF LOCAL:0 < 0 || LOCAL:0 > 255
+    CLEARLINE 1
+    REUSELASTLINE R 数值无效，请输入 0 到 255。
+    GOTO INPUT_TEXT_RGB_START
+ENDIF
+
+PRINTL 请输入 G：
+INPUT
+LOCAL:1 = RESULT
+IF LOCAL:1 < 0 || LOCAL:1 > 255
+    CLEARLINE 1
+    REUSELASTLINE G 数值无效，请输入 0 到 255。
+    GOTO INPUT_TEXT_RGB_START
+ENDIF
+
+PRINTL 请输入 B：
+INPUT
+LOCAL:2 = RESULT
+IF LOCAL:2 < 0 || LOCAL:2 > 255
+    CLEARLINE 1
+    REUSELASTLINE B 数值无效，请输入 0 到 255。
+    GOTO INPUT_TEXT_RGB_START
+ENDIF
+
+GLOBAL:210 = LOCAL:0
+GLOBAL:211 = LOCAL:1
+GLOBAL:212 = LOCAL:2
+GLOBAL:200 = 4
+
+SAVEGLOBAL
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+DRAWLINE
+PRINTFORML 文本颜色已设置为：自定义RGB({GLOBAL:210},{GLOBAL:211},{GLOBAL:212})
+DRAWLINE
+PRINTL [0] 返回文本颜色设置
+
+$INPUT_TEXT_RGB_END
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    GOTO INPUT_TEXT_RGB_END
+ENDIF
+
+
+
+; ==================================================
+; 输入自定义背景 RGB
+; ==================================================
+@INPUT_BG_RGB
+
+$INPUT_BG_RGB_START
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 自定义背景颜色 / Background RGB
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL
+PRINTL 请输入背景颜色 RGB 数值。
+PRINTL 需要依次输入 R、G、B，每个数值范围为 0 到 255。
+PRINTL
+PRINTL 示例：
+PRINTL   深色：15, 15, 18
+PRINTL   蓝黑色：10, 18, 30
+PRINTL   纯黑色：0, 0, 0
+PRINTL
+DRAWLINE
+
+PRINTL 请输入 R：
+INPUT
+LOCAL:0 = RESULT
+IF LOCAL:0 < 0 || LOCAL:0 > 255
+    CLEARLINE 1
+    REUSELASTLINE R 数值无效，请输入 0 到 255。
+    GOTO INPUT_BG_RGB_START
+ENDIF
+
+PRINTL 请输入 G：
+INPUT
+LOCAL:1 = RESULT
+IF LOCAL:1 < 0 || LOCAL:1 > 255
+    CLEARLINE 1
+    REUSELASTLINE G 数值无效，请输入 0 到 255。
+    GOTO INPUT_BG_RGB_START
+ENDIF
+
+PRINTL 请输入 B：
+INPUT
+LOCAL:2 = RESULT
+IF LOCAL:2 < 0 || LOCAL:2 > 255
+    CLEARLINE 1
+    REUSELASTLINE B 数值无效，请输入 0 到 255。
+    GOTO INPUT_BG_RGB_START
+ENDIF
+
+GLOBAL:220 = LOCAL:0
+GLOBAL:221 = LOCAL:1
+GLOBAL:222 = LOCAL:2
+GLOBAL:201 = 3
+
+SAVEGLOBAL
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+DRAWLINE
+PRINTFORML 背景颜色已设置为：自定义RGB({GLOBAL:220},{GLOBAL:221},{GLOBAL:222})
+DRAWLINE
+PRINTL [0] 返回背景颜色设置
+
+$INPUT_BG_RGB_END
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    GOTO INPUT_BG_RGB_END
+ENDIF
+
+
+
+; ==================================================
+; AI 通信测试页面
+; ==================================================
+@TITLE_SETTING_AI_TEST
+
+$TITLE_SETTING_AI_TEST_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL AI 通信测试 / AI Bridge Test
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 本页面用于测试AI游玩的完整流程。
+DRAWLINE
+PRINTL 请确认：
+PRINTL   1. 通过start_game.bat启动。
+PRINTL   2. AI Bridge窗口正在监听。
+PRINTL   3. 请确认模型服务已经启动。
+DRAWLINE
+PRINTL 测试流程：
+PRINTL   1. 选择输入要发送给 AI 的测试文本。
+PRINTL   2. 页面会等待数秒后自动读取 AI 回复。
+DRAWLINE
+PRINTL [1] 输入测试请求并发送
+PRINTL [2] 读取上一条 AI 回复
+PRINTL [0] 返回设置页面
+
+$TITLE_SETTING_AI_TEST_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        CALL AI_SEND_TEST_REQUEST
+        GOTO TITLE_SETTING_AI_TEST_SELECT
+
+    CASE 2
+        CALL AI_READ_TEST_RESPONSE
+        GOTO TITLE_SETTING_AI_TEST_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_SETTING_AI_TEST_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 输入、发送并自动读取 AI 测试请求
+; ==================================================
+@AI_SEND_TEST_REQUEST
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 输入 AI 测试请求 / Send Request
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 请输入要发送给 AI 的测试文本。
+PRINTL
+PRINTL 示例：
+PRINTL   你是谁？
+PRINTL   请扮演一个冷淡的女仆，用一句话欢迎玩家回家。
+PRINTL   请用温柔的语气回应：我回来了。
+DRAWLINE
+PRINTL 注意：
+PRINTL   当前测试版暂不建议在输入内容中使用 | 符号。
+PRINTL   因为 | 会被 ai_bridge.py 当作字段分隔符。
+DRAWLINE
+
+$AI_SEND_TEST_REQUEST_TEXT_INPUT
+INPUTS
+LOCALS:1 '= RESULTS:0
+
+IF LOCALS:1 == ""
+    DRAWLINE
+    PRINTL 输入为空，本次没有写入请求。
+    DRAWLINE
+    PRINTL [0] 返回 AI 通信测试页面
+
+    $AI_SEND_TEST_REQUEST_EMPTY_INPUT
+    INPUT
+    IF RESULT == 0
+        RETURN
+    ELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请输入 0 返回。
+        GOTO AI_SEND_TEST_REQUEST_EMPTY_INPUT
+    ENDIF
+ENDIF
+
+; 写入格式说明：
+;   PROMPT              本次要发送给 AI 的正文
+;   REPLY_LIMIT         回复上限 Token，对应 GLOBAL:402
+;   MEMORY_LIMIT        记忆容量 Token，对应 GLOBAL:403
+;   MODEL_SOURCE_CODE   模型来源编号，对应 GLOBAL:400，0本地 1外部服务
+;   STYLE_CODE          对话风格编号，对应 GLOBAL:404
+;
+; 注意：
+;   这里必须使用字符串表达式赋值符号 '= 。
+;   STRFORM 用于把玩家输入和当前设置拼成结构化请求。
+LOCALS:0 '= STRFORM("PROMPT=%LOCALS:1%|REPLY_LIMIT={GLOBAL:402}|MEMORY_LIMIT={GLOBAL:403}|MODEL_SOURCE_CODE={GLOBAL:400}|STYLE_CODE={GLOBAL:404}")
+
+; 先把回复文件写成等待状态，避免立刻读取到上一条旧回复。
+SAVETEXT "【等待中】AI 请求已发送，正在等待 AI Bridge 生成回复。", "AI/ai_response.txt", 0, 1
+
+; 再写入请求文件。AI Bridge 监听到文件变化后会自动处理。
+SAVETEXT LOCALS:0, "AI/ai_request.txt", 0, 1
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL AI 请求已发送 / Waiting
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 已写入请求到：AI/ai_request.txt
+PRINTL 已将回复状态临时设置为：等待中
+DRAWLINE
+PRINTL 当前请求内容为：
+PRINTFORML %LOCALS:0%
+DRAWLINE
+PRINTFORM 当前模型来源：
+CALL PRINT_AI_MODEL_SOURCE_NAME
+PRINTL
+PRINTFORM 当前回复上限：
+CALL PRINT_AI_REPLY_LIMIT_NAME
+PRINTL
+PRINTFORM 当前记忆容量：
+CALL PRINT_AI_MEMORY_LIMIT_NAME
+PRINTL
+PRINTFORM 当前对话风格：
+CALL PRINT_AI_STYLE_NAME
+PRINTL
+DRAWLINE
+PRINTL 正在等待 AI Bridge 处理请求……
+PRINTL 如果 GX 模型服务较慢，可以稍后选择 [1] 再读取一次。
+DRAWLINE
+
+; 等待 4 秒后自动读取回复。
+; TWAIT 第一参数为等待时间，第二参数为输入接收标志。
+; 第二参数为 1 时，不接受输入，强制等待到时间结束。
+TWAIT 4000, 1
+
+CALL AI_AUTO_READ_TEST_RESPONSE
+RETURN
+
+
+
+; ==================================================
+; 自动读取 AI 测试回复
+; ==================================================
+@AI_AUTO_READ_TEST_RESPONSE
+
+$AI_AUTO_READ_TEST_RESPONSE_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL AI 测试回复 / Auto Read Response
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 读取到的 AI 回复如下：
+DRAWLINE
+
+LOADTEXT "AI/ai_response.txt", 0, 1
+
+IF RESULTS:0 == ""
+    PRINTL 没有读取到回复内容。
+    PRINTL 请检查：
+    PRINTL   1. AI/ai_response.txt 是否存在。
+    PRINTL   2. AI Bridge 是否正在运行。
+    PRINTL   3. AI 文件夹是否和 Emuera.exe 在同一级目录。
+    PRINTL   4. 如果使用 GX，GX 模型服务是否已经启动。
+ELSE
+    PRINTFORML %RESULTS:0%
+ENDIF
+
+DRAWLINE
+PRINTL [1] 再读取一次
+PRINTL [0] 返回 AI 通信测试页面
+
+$AI_AUTO_READ_TEST_RESPONSE_INPUT
+INPUT
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        PRINTL 稍等，正在重新读取……
+        TWAIT 1500, 1
+        GOTO AI_AUTO_READ_TEST_RESPONSE_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO AI_AUTO_READ_TEST_RESPONSE_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 读取上一条 AI 测试回复
+; ==================================================
+@AI_READ_TEST_RESPONSE
+
+$AI_READ_TEST_RESPONSE_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 读取上一条 AI 测试回复 / Read Last Response
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTL 读取到的 AI 回复如下：
+DRAWLINE
+
+LOADTEXT "AI/ai_response.txt", 0, 1
+
+IF RESULTS:0 == ""
+    PRINTL 没有读取到回复内容。
+    PRINTL 请检查：
+    PRINTL   1. AI/ai_response.txt 是否存在。
+    PRINTL   2. AI Bridge 是否正在运行。
+    PRINTL   3. AI 文件夹是否和 Emuera.exe 在同一级目录。
+    PRINTL   4. 如果使用 GX，GX 模型服务是否已经启动。
+ELSE
+    PRINTFORML %RESULTS:0%
+ENDIF
+
+DRAWLINE
+PRINTL [1] 再读取一次
+PRINTL [0] 返回 AI 通信测试页面
+
+$AI_READ_TEST_RESPONSE_INPUT
+INPUT
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        PRINTL 稍等，正在重新读取……
+        TWAIT 1500, 1
+        GOTO AI_READ_TEST_RESPONSE_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO AI_READ_TEST_RESPONSE_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 退出游戏确认页面
+; ==================================================
+@TITLE_EXIT_CONFIRM
+
+IF GLOBAL:301 == 0
+    QUIT
+ENDIF
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 退出确认 / Exit Confirm
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 当前已开启“返回确认”。
+PRINTL 确定要退出游戏吗？
+DRAWLINE
+PRINTL [1] 确定退出
+PRINTL [0] 取消，返回标题
+
+$TITLE_EXIT_CONFIRM_INPUT
+INPUT
+SELECTCASE RESULT
+    CASE 1
+        QUIT
+
+    CASE 0
+        RETURN
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_EXIT_CONFIRM_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 关于页面
+; ==================================================
+@TITLE_ABOUT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 关于 / About
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTL Era_AI
+PRINTL
+PRINTL 版本：测试版 1.0
+PRINTL 类型：Era / Emuera 风格 AI 对话项目
+PRINTL 制作：Natepage
+DRAWLINE
+
+PRINTL 项目说明：
+PRINTL   本项目用于测试 Emuera 剧本与外部 AI 模型的桥接流程。
+PRINTL   玩家可以在剧本中自由输入文本，由 AI Bridge 调用模型生成角色回应。
+PRINTL   当前项目以“剧本文件”为单位扩展内容。
+DRAWLINE
+
+PRINTL 当前已实现：
+PRINTL   ・剧本选择
+PRINTL   ・雨夜房间测试剧本
+PRINTL   ・玩家自由输入对话
+PRINTL   ・短期对话历史
+PRINTL   ・外部长期记忆
+PRINTL   ・保存与读取进度
+PRINTL   ・模型启动前选择
+PRINTL   ・模型接入
+DRAWLINE
+
+PRINTL 当前说明：
+PRINTL   ・本项目仍处于原型测试阶段。
+PRINTL   ・AI 回复可能存在风格偏移、重复或不稳定。
+PRINTL   ・长期记忆保存在游戏根目录 cache 文件夹中。
+PRINTL   ・模型配置由 AI 文件夹中的配置文件控制。
+PRINTL   ・请勿公开包含密钥或私人配置的本地文件。
+DRAWLINE
+
+PRINTL 后续开发目标：
+PRINTL   ・支持更多独立剧本
+PRINTL   ・将角色设定与剧本设定集中管理
+PRINTL   ・优化长期记忆摘要
+PRINTL   ・完善设置页与对话风格系统
+PRINTL   ・提高 AI 对话流程的稳定性
+DRAWLINE
+
+PRINTL [0] 返回标题
+PRINTL
+
+$TITLE_ABOUT_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回。
+    GOTO TITLE_ABOUT_INPUT
+ENDIF

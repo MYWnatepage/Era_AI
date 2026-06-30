@@ -1,0 +1,867 @@
+; SCENARIO_TEST_RAIN_ROOM_NO_AI.ERB
+; 测试剧本：雨夜房间
+; Edit 1.7
+;
+; 本版内容：
+;   1. 对话历史记录时间、玩家提问、艾拉回应。
+;   2. 回应页支持继续对话。
+;   3. 等待回应时会持续等待，不再固定 4 秒后强行读取。
+;   4. 对话完成后更新好感度、疲劳、时间，并按设置触发自动存档。
+;   5. 保存进度 / 读取进度改为直接调用 Emuera 原生 SAVEGAME / LOADGAME。
+;      不再进入二级子菜单。
+;   6. 外部长期记忆由 AI/ai_bridge.py 写入 cache 文件夹。
+;   7. 剧本内可查看 / 清空 cache/rain_room_memory.txt。
+;   8. 写入 AI/ai_request.txt 时改用 JSON 请求格式，兼容新版 ai_bridge.py。
+;   9. 修正 STRFORM 不能直接包含 JSON 外层大括号的问题，改为分段拼接 JSON。
+;   10. 清理 prompt 中空白的最近对话记录，只写入已经存在的短期历史。
+;   11. 取消 ERB 侧 REPLACE 转义，由 ai_bridge.py 的类 JSON 解析器兼容英文双引号和反斜杠。
+
+
+; ==================================================
+; 剧本入口
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_START
+
+; 只在第一次进入本剧本时初始化短期历史。
+; 避免从本剧本页面返回后再次清空历史。
+IF GLOBAL:510 == 0
+    SAVESTR:20 '= ""
+    SAVESTR:21 '= ""
+    SAVESTR:22 '= ""
+
+    SAVESTR:23 '= ""
+    SAVESTR:24 '= ""
+    SAVESTR:25 '= ""
+
+    SAVESTR:26 '= ""
+    SAVESTR:27 '= ""
+    SAVESTR:28 '= ""
+
+    SAVESTR:29 '= ""
+    SAVESTR:30 '= ""
+    SAVESTR:31 '= ""
+
+    SAVESTR:32 '= ""
+    SAVESTR:33 '= ""
+    SAVESTR:34 '= ""
+
+    SAVESTR:35 '= ""
+    SAVESTR:36 '= ""
+    SAVESTR:37 '= ""
+
+    SAVESTR:38 '= ""
+    SAVESTR:39 '= ""
+    SAVESTR:40 '= ""
+
+    SAVESTR:41 '= ""
+    SAVESTR:42 '= ""
+    SAVESTR:43 '= ""
+
+    SAVESTR:44 '= ""
+    SAVESTR:45 '= ""
+    SAVESTR:46 '= ""
+
+    SAVESTR:47 '= ""
+    SAVESTR:48 '= ""
+    SAVESTR:49 '= ""
+
+    SAVESTR:50 '= ""
+    SAVESTR:51 '= ""
+    SAVESTR:52 '= ""
+ENDIF
+
+SAVEGLOBAL
+
+$SCENARIO_TEST_RAIN_ROOM_MAIN
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 雨夜房间 / Rain Room
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTL 剧本名：雨夜房间
+PRINTL 作者：Natepage
+PRINTL 类型：短篇对话测试剧本
+DRAWLINE
+PRINTL 当前角色：
+PRINTL   艾拉
+PRINTL
+PRINTL 当前状态：
+PRINTFORML   好感度：{FLAG:0}
+PRINTFORML   疲劳：{FLAG:1}
+PRINTFORML   第 {DAY} 天 / 时间段 {TIME}
+DRAWLINE
+PRINTL 当前场景：
+PRINTL   雨夜。你刚刚回到房间。
+PRINTL   房间里灯光很暗，窗外能听见细密的雨声。
+PRINTL   艾拉一直在房间里等你。
+DRAWLINE
+PRINTL [1] 和艾拉对话
+PRINTL [2] 对话历史
+PRINTL [3] 查看剧本说明
+PRINTL [4] 保存进度
+PRINTL [5] 读取进度
+PRINTL [6] 查看长期记忆
+PRINTL [7] 清空长期记忆
+PRINTL [9] 返回标题
+
+$SCENARIO_TEST_RAIN_ROOM_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 1
+        CALL SCENARIO_TEST_RAIN_ROOM_TALK
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASE 2
+        CALL SCENARIO_TEST_RAIN_ROOM_HISTORY
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASE 3
+        CALL SCENARIO_TEST_RAIN_ROOM_INFO
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASE 4
+;       和常见工程一样，直接打开 Emuera 原生保存界面。
+;       不再进入二级保存菜单。
+        SAVEGAME
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASE 5
+;       和常见工程一样，直接打开 Emuera 原生读取界面。
+;       如果取消读取，会回到当前页面。
+        LOADGAME
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASE 6
+        CALL SCENARIO_TEST_RAIN_ROOM_MEMORY_VIEW
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASE 7
+        CALL SCENARIO_TEST_RAIN_ROOM_MEMORY_CLEAR
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASE 9
+        CALL GAME_RETURN_TITLE_CONFIRM
+        IF GLOBAL:599 == 1
+            BEGIN TITLE
+        ENDIF
+        GOTO SCENARIO_TEST_RAIN_ROOM_MAIN
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO SCENARIO_TEST_RAIN_ROOM_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 和艾拉对话
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_TALK
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 和艾拉对话 / Talk With Aira
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 请输入你想对艾拉说的话。
+PRINTL
+PRINTL 注意：普通双引号和反斜杠可测试；极端特殊符号后续再完善。
+DRAWLINE
+
+INPUTS
+CALL APPLY_DISPLAY_SETTINGS
+
+IF RESULTS:0 == ""
+    DRAWLINE
+    PRINTL 输入为空。
+    DRAWLINE
+    PRINTL [0] 返回剧本页面
+
+    $SCENARIO_TEST_RAIN_ROOM_EMPTY_INPUT
+    INPUT
+    IF RESULT == 0
+        RETURN
+    ELSE
+        GOTO SCENARIO_TEST_RAIN_ROOM_EMPTY_INPUT
+    ENDIF
+ENDIF
+
+; SAVESTR:20 = 等待回应标记
+; SAVESTR:21 = 等待回应时的玩家输入
+; SAVESTR:22 = 等待回应时的时间戳
+SAVESTR:20 '= "WAITING"
+SAVESTR:21 '= RESULTS:0
+SAVESTR:22 '= STRFORM("第{DAY}天 时间段{TIME}")
+
+; 先把上一条回复清成等待文本，避免读取到旧内容。
+SAVETEXT "（艾拉还没有回应。）", "AI/ai_response.txt", 0, 1
+
+; 生成最近对话摘要。
+; 注意：
+;   短期历史在 ERB 里保存，用于本页显示。
+;   长期记忆由 ai_bridge.py 从 cache/rain_room_memory.txt 中读取。
+;   这里只拼接已经存在的历史记录，不再把空槽写进 prompt。
+LOCALS:0 '= ""
+
+IF SAVESTR:23 != ""
+    LOCALS:0 += "最近对话记录（由近到远）："
+    LOCALS:0 += STRFORM("时间：%SAVESTR:23% 你：%SAVESTR:24% 艾拉：%SAVESTR:25% ")
+ENDIF
+
+IF SAVESTR:26 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:26% 你：%SAVESTR:27% 艾拉：%SAVESTR:28% ")
+ENDIF
+
+IF SAVESTR:29 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:29% 你：%SAVESTR:30% 艾拉：%SAVESTR:31% ")
+ENDIF
+
+IF SAVESTR:32 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:32% 你：%SAVESTR:33% 艾拉：%SAVESTR:34% ")
+ENDIF
+
+IF SAVESTR:35 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:35% 你：%SAVESTR:36% 艾拉：%SAVESTR:37% ")
+ENDIF
+
+IF SAVESTR:38 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:38% 你：%SAVESTR:39% 艾拉：%SAVESTR:40% ")
+ENDIF
+
+IF SAVESTR:41 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:41% 你：%SAVESTR:42% 艾拉：%SAVESTR:43% ")
+ENDIF
+
+IF SAVESTR:44 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:44% 你：%SAVESTR:45% 艾拉：%SAVESTR:46% ")
+ENDIF
+
+IF SAVESTR:47 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:47% 你：%SAVESTR:48% 艾拉：%SAVESTR:49% ")
+ENDIF
+
+IF SAVESTR:50 != ""
+    IF LOCALS:0 == ""
+        LOCALS:0 += "最近对话记录（由近到远）："
+    ENDIF
+    LOCALS:0 += STRFORM("时间：%SAVESTR:50% 你：%SAVESTR:51% 艾拉：%SAVESTR:52% ")
+ENDIF
+
+; 生成剧本请求。
+LOCALS:1 '= STRFORM("你现在扮演角色：艾拉。角色设定：艾拉是一个温柔、安静、略带关心的少女，说话自然克制，不要夸张，不要解释自己是AI。当前场景：雨夜，玩家刚刚回到房间，房间里灯光很暗，窗外有细密雨声，艾拉一直在房间里等玩家。当前状态：艾拉对玩家的好感度为{FLAG:0}，玩家当前疲劳为{FLAG:1}。%LOCALS:0% 玩家现在对艾拉说：%SAVESTR:21% 请以艾拉的口吻回复，只输出艾拉对玩家说的话，不要输出旁白标题，不要输出系统信息，内容适合文字游戏窗口显示。")
+
+; 生成当前风格字段。
+; 说明：
+;   ai_bridge.py 不再维护 STYLE_MAP / STYLE_PROMPT_MAP。
+;   所以这里把当前风格名称、风格提示词、mock 测试回复一并写入请求文档。
+;   后续如果要彻底统一维护，可把这段风格设置移动到公共设置函数中。
+SELECTCASE GLOBAL:404
+    CASE 1
+        LOCALS:3 '= "简洁"
+        LOCALS:4 '= "使用简洁风格，回复更短，减少环境描写和心理描写。"
+        LOCALS:5 '= "欢迎回来。"
+
+    CASE 2
+        LOCALS:3 '= "细腻"
+        LOCALS:4 '= "使用细腻风格，适当增加心理、动作、神态和氛围描写。"
+        LOCALS:5 '= "你终于来了。我一直在等你，连窗外的雨声都像是在提醒我你的脚步。"
+
+    CASE 3
+        LOCALS:3 '= "活泼"
+        LOCALS:4 '= "使用活泼风格，语气轻快，表达更有活力。"
+        LOCALS:5 '= "啊，你来了！太好了，我正想找你说话呢。"
+
+    CASE 4
+        LOCALS:3 '= "冷淡"
+        LOCALS:4 '= "使用冷淡风格，语气克制，情绪表达较少。"
+        LOCALS:5 '= "……来了就坐吧。别站在那里。"
+
+    CASE 5
+        LOCALS:3 '= "温柔"
+        LOCALS:4 '= "使用温柔风格，语气柔和，更照顾玩家感受。"
+        LOCALS:5 '= "欢迎回来。看到你平安无事，我就放心了。"
+
+    CASE 6
+        LOCALS:3 '= "幽默"
+        LOCALS:4 '= "使用幽默风格，可以适当加入轻松和调侃，但不要破坏剧情氛围。"
+        LOCALS:5 '= "欢迎欢迎，再不来我都快以为你迷路了。"
+
+    CASE 7
+        LOCALS:3 '= "严肃"
+        LOCALS:4 '= "使用严肃风格，语气正式，减少玩笑和夸张表达。"
+        LOCALS:5 '= "你来了。现在开始确认接下来的行动。"
+
+    CASE 8
+        LOCALS:3 '= "沉稳"
+        LOCALS:4 '= "使用沉稳风格，节奏较慢，表达稳定克制。"
+        LOCALS:5 '= "你来了。先坐下吧，我们慢慢说。"
+
+    CASE 9
+        LOCALS:3 '= "文学化"
+        LOCALS:4 '= "使用文学化风格，增加叙事感和文字表现力，但不要过度堆砌辞藻。"
+        LOCALS:5 '= "门扉轻响，你的身影再次出现在微暗的光里。她抬起眼，轻声说道：欢迎回来。"
+
+    CASEELSE
+        LOCALS:3 '= "标准"
+        LOCALS:4 '= "使用标准自然的角色对话风格，语气自然，描写适中。"
+        LOCALS:5 '= "欢迎回来，我一直在等你。"
+ENDSELECT
+
+; 写入 JSON 请求。
+; 重要：
+;   1. 新版 ai_bridge.py 优先读取 JSON。
+;   2. SCENARIO_ID / PLAYER_INPUT / GAME_TIME 用于外部 cache 记忆文件。
+;   3. ERB 不做复杂 JSON 转义，由新版 ai_bridge.py 兼容类 JSON 请求。
+; 注意：
+;   Emuera 的 STRFORM 会把 { ... } 识别为格式表达式。
+;   因此不能把完整 JSON 对象直接放进 STRFORM。
+;   这里采用“普通字符串写 JSON 外壳 + STRFORM 写变量字段”的方式。
+LOCALS:2 '= "{"
+LOCALS:2 += STRFORM("\"prompt\":\"%LOCALS:1%\",")
+LOCALS:2 += STRFORM("\"reply_limit\":{GLOBAL:402},")
+LOCALS:2 += STRFORM("\"memory_limit\":{GLOBAL:403},")
+LOCALS:2 += "\"scenario_id\":\"rain_room\","
+LOCALS:2 += "\"scenario_name\":\"雨夜房间\","
+LOCALS:2 += "\"character_name\":\"艾拉\","
+LOCALS:2 += STRFORM("\"style_code\":\"{GLOBAL:404}\",")
+LOCALS:2 += STRFORM("\"style_name\":\"%LOCALS:3%\",")
+LOCALS:2 += STRFORM("\"style_prompt\":\"%LOCALS:4%\",")
+LOCALS:2 += STRFORM("\"mock_response\":\"%LOCALS:5%\",")
+LOCALS:2 += STRFORM("\"player_input\":\"%SAVESTR:21%\",")
+LOCALS:2 += STRFORM("\"game_time\":\"%SAVESTR:22%\"")
+LOCALS:2 += "}"
+
+SAVETEXT LOCALS:2, "AI/ai_request.txt", 0, 1
+
+CALL SCENARIO_TEST_RAIN_ROOM_WAIT_RESPONSE
+
+RETURN
+
+
+
+; ==================================================
+; 等待艾拉回应
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_WAIT_RESPONSE
+
+$SCENARIO_TEST_RAIN_ROOM_WAIT_RESPONSE_LOOP
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 片刻沉默 / Waiting
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTL 你对艾拉说：
+PRINTFORML %SAVESTR:21%
+DRAWLINE
+PRINTL 艾拉似乎听见了你的声音。
+PRINTL 她沉默了片刻，像是在整理自己的措辞……
+PRINTL
+PRINTL 正在等待她回应。
+DRAWLINE
+
+LOADTEXT "AI/ai_response.txt", 0, 1
+
+IF RESULTS:0 == ""
+    TWAIT 1000, 1
+    GOTO SCENARIO_TEST_RAIN_ROOM_WAIT_RESPONSE_LOOP
+ENDIF
+
+IF RESULTS:0 == "（艾拉还没有回应。）"
+    TWAIT 1000, 1
+    GOTO SCENARIO_TEST_RAIN_ROOM_WAIT_RESPONSE_LOOP
+ENDIF
+
+CALL SCENARIO_TEST_RAIN_ROOM_SHOW_RESPONSE
+
+RETURN
+
+
+
+; ==================================================
+; 显示艾拉回应
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_SHOW_RESPONSE
+
+$SCENARIO_TEST_RAIN_ROOM_SHOW_RESPONSE_SELECT
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 艾拉的回应 / Aira
+ALIGNMENT LEFT
+DRAWLINE
+
+LOADTEXT "AI/ai_response.txt", 0, 1
+
+IF RESULTS:0 == ""
+    PRINTL 艾拉暂时没有回应。
+
+ELSEIF RESULTS:0 == "（艾拉还没有回应。）"
+    PRINTL 艾拉还没有回应。
+
+ELSE
+    ; 如果当前有等待中的玩家输入，则把这一轮写入对话历史。
+    IF SAVESTR:20 == "WAITING"
+        CALL SCENARIO_TEST_RAIN_ROOM_ADD_HISTORY
+        CALL SCENARIO_TEST_RAIN_ROOM_AFTER_TALK
+    ENDIF
+
+    PRINTFORML %RESULTS:0%
+ENDIF
+
+DRAWLINE
+PRINTL [1] 继续对话
+PRINTL [2] 对话历史
+PRINTL [3] 保存进度
+PRINTL [0] 返回剧本页面
+
+$SCENARIO_TEST_RAIN_ROOM_SHOW_RESPONSE_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        CALL SCENARIO_TEST_RAIN_ROOM_TALK
+        RETURN
+
+    CASE 2
+        CALL SCENARIO_TEST_RAIN_ROOM_HISTORY
+        GOTO SCENARIO_TEST_RAIN_ROOM_SHOW_RESPONSE_SELECT
+
+    CASE 3
+;       直接打开 Emuera 原生保存界面。
+        SAVEGAME
+        GOTO SCENARIO_TEST_RAIN_ROOM_SHOW_RESPONSE_SELECT
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO SCENARIO_TEST_RAIN_ROOM_SHOW_RESPONSE_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 对话结束后的状态处理
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_AFTER_TALK
+
+FLAG:0 += 1
+FLAG:1 += 1
+
+TIME += 1
+IF TIME >= 4
+    TIME = 0
+    DAY += 1
+ENDIF
+
+; 如果设置中开启自动存档，则每轮对话结束后写入 99 号自动存档槽。
+; 这里调用的是无提示自动存档，不会弹出 SAVEGAME 界面。
+CALL GAME_AUTOSAVE
+
+RETURN
+
+
+
+; ==================================================
+; 添加一轮对话历史
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_ADD_HISTORY
+
+; 说明：
+;   本函数直接从稳定位置读取：
+;       SAVESTR:22 = 时间戳
+;       SAVESTR:21 = 玩家输入
+;       AI/ai_response.txt = 艾拉回应
+
+LOADTEXT "AI/ai_response.txt", 0, 1
+
+IF RESULTS:0 == ""
+    RETURN
+ENDIF
+
+IF RESULTS:0 == "（艾拉还没有回应。）"
+    RETURN
+ENDIF
+
+; 把旧记录整体后移一格，最新记录放到 23 / 24 / 25。
+SAVESTR:50 '= SAVESTR:47
+SAVESTR:51 '= SAVESTR:48
+SAVESTR:52 '= SAVESTR:49
+
+SAVESTR:47 '= SAVESTR:44
+SAVESTR:48 '= SAVESTR:45
+SAVESTR:49 '= SAVESTR:46
+
+SAVESTR:44 '= SAVESTR:41
+SAVESTR:45 '= SAVESTR:42
+SAVESTR:46 '= SAVESTR:43
+
+SAVESTR:41 '= SAVESTR:38
+SAVESTR:42 '= SAVESTR:39
+SAVESTR:43 '= SAVESTR:40
+
+SAVESTR:38 '= SAVESTR:35
+SAVESTR:39 '= SAVESTR:36
+SAVESTR:40 '= SAVESTR:37
+
+SAVESTR:35 '= SAVESTR:32
+SAVESTR:36 '= SAVESTR:33
+SAVESTR:37 '= SAVESTR:34
+
+SAVESTR:32 '= SAVESTR:29
+SAVESTR:33 '= SAVESTR:30
+SAVESTR:34 '= SAVESTR:31
+
+SAVESTR:29 '= SAVESTR:26
+SAVESTR:30 '= SAVESTR:27
+SAVESTR:31 '= SAVESTR:28
+
+SAVESTR:26 '= SAVESTR:23
+SAVESTR:27 '= SAVESTR:24
+SAVESTR:28 '= SAVESTR:25
+
+SAVESTR:23 '= SAVESTR:22
+SAVESTR:24 '= SAVESTR:21
+SAVESTR:25 '= RESULTS:0
+
+IF GLOBAL:510 < 10
+    GLOBAL:510 += 1
+ENDIF
+
+SAVESTR:20 '= ""
+SAVESTR:21 '= ""
+SAVESTR:22 '= ""
+
+SAVEGLOBAL
+
+RETURN
+
+
+
+; ==================================================
+; 对话历史
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_HISTORY
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 对话历史 / History
+ALIGNMENT LEFT
+DRAWLINE
+
+IF GLOBAL:510 == 0 || SAVESTR:25 == ""
+    PRINTL 目前还没有对话记录。
+ELSE
+    PRINTL 最近的对话记录如下。
+    PRINTL
+
+    IF SAVESTR:50 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:50%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:51%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:52%
+    ENDIF
+
+    IF SAVESTR:47 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:47%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:48%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:49%
+    ENDIF
+
+    IF SAVESTR:44 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:44%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:45%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:46%
+    ENDIF
+
+    IF SAVESTR:41 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:41%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:42%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:43%
+    ENDIF
+
+    IF SAVESTR:38 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:38%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:39%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:40%
+    ENDIF
+
+    IF SAVESTR:35 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:35%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:36%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:37%
+    ENDIF
+
+    IF SAVESTR:32 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:32%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:33%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:34%
+    ENDIF
+
+    IF SAVESTR:29 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:29%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:30%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:31%
+    ENDIF
+
+    IF SAVESTR:26 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:26%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:27%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:28%
+    ENDIF
+
+    IF SAVESTR:23 != ""
+        DRAWLINE
+        PRINTFORML 时间：%SAVESTR:23%
+        PRINTL 你：
+        PRINTFORML %SAVESTR:24%
+        PRINTL 艾拉：
+        PRINTFORML %SAVESTR:25%
+    ENDIF
+ENDIF
+
+DRAWLINE
+PRINTL [0] 返回上一页
+
+$SCENARIO_TEST_RAIN_ROOM_HISTORY_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回。
+    GOTO SCENARIO_TEST_RAIN_ROOM_HISTORY_INPUT
+ENDIF
+
+
+
+; ==================================================
+; 查看长期记忆
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_MEMORY_VIEW
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 长期记忆 / Memory
+ALIGNMENT LEFT
+DRAWLINE
+
+LOADTEXT "cache/rain_room_memory.txt", 0, 1
+
+IF RESULTS:0 == ""
+    PRINTL 目前还没有长期记忆。
+    PRINTL
+    PRINTL 如果你已经对话过，请确认：
+    PRINTL   ・AI Bridge 正在运行。
+    PRINTL   ・游戏根目录下已经生成 cache 文件夹。
+ELSE
+    PRINTFORML %RESULTS:0%
+ENDIF
+
+DRAWLINE
+PRINTL [0] 返回上一页
+
+$SCENARIO_TEST_RAIN_ROOM_MEMORY_VIEW_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回。
+    GOTO SCENARIO_TEST_RAIN_ROOM_MEMORY_VIEW_INPUT
+ENDIF
+
+
+
+; ==================================================
+; 清空长期记忆
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_MEMORY_CLEAR
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 清空长期记忆 / Clear Memory
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTL 确定要清空雨夜房间的长期记忆吗？
+PRINTL 这不会清空当前存档里的短期对话历史。
+DRAWLINE
+PRINTL [1] 确定清空
+PRINTL [0] 取消
+
+$SCENARIO_TEST_RAIN_ROOM_MEMORY_CLEAR_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+
+    CASE 1
+        SAVETEXT "雨夜房间长期记忆：", "cache/rain_room_memory.txt", 0, 1
+        SAVETEXT "", "cache/rain_room_history.txt", 0, 1
+        SAVETEXT "TOTAL_TURNS=0", "cache/rain_room_meta.txt", 0, 1
+
+        CLEARLINE LINECOUNT
+        CALL APPLY_DISPLAY_SETTINGS
+
+        DRAWLINE
+        ALIGNMENT CENTER
+        PRINTL 已清空 / Cleared
+        ALIGNMENT LEFT
+        DRAWLINE
+        PRINTL 长期记忆和外部完整历史已清空。
+        DRAWLINE
+        PRINTL [0] 返回上一页
+
+        $SCENARIO_TEST_RAIN_ROOM_MEMORY_CLEAR_DONE_INPUT
+        INPUT
+        IF RESULT == 0
+            RETURN
+        ELSE
+            CLEARLINE 1
+            REUSELASTLINE 输入无效，请输入 0 返回。
+            GOTO SCENARIO_TEST_RAIN_ROOM_MEMORY_CLEAR_DONE_INPUT
+        ENDIF
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO SCENARIO_TEST_RAIN_ROOM_MEMORY_CLEAR_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 剧本说明
+; ==================================================
+@SCENARIO_TEST_RAIN_ROOM_INFO
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 剧本说明 / Scenario Info
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTL 剧本名：雨夜房间
+PRINTL 作者：Natepage
+PRINTL 版本：Test 1.0
+DRAWLINE
+PRINTL 这是一个短篇测试剧本。
+PRINTL
+PRINTL 已包含：
+PRINTL   ・固定角色：艾拉
+PRINTL   ・固定场景：雨夜房间
+PRINTL   ・玩家自由输入
+PRINTL   ・持续等待角色回应
+PRINTL   ・继续对话
+PRINTL   ・最近 10 轮对话历史
+PRINTL   ・好感度与疲劳变化
+PRINTL   ・时间推进
+PRINTL   ・自动存档
+PRINTL   ・保存进度
+PRINTL   ・读取进度
+PRINTL   ・查看长期记忆
+PRINTL   ・清空长期记忆
+DRAWLINE
+PRINTL 说明：
+PRINTL   ・短期对话历史保存在存档中。
+PRINTL   ・长期记忆保存在游戏根目录 cache 文件夹中。
+PRINTL   ・长期记忆由 AI Bridge 自动维护。
+DRAWLINE
+PRINTL 暂未包含：
+PRINTL   ・剧情分支
+DRAWLINE
+PRINTL [0] 返回剧本页面
+
+$SCENARIO_TEST_RAIN_ROOM_INFO_INPUT
+INPUT
+IF RESULT == 0
+    RETURN
+ELSE
+    CLEARLINE 1
+    REUSELASTLINE 输入无效，请输入 0 返回。
+    GOTO SCENARIO_TEST_RAIN_ROOM_INFO_INPUT
+ENDIF

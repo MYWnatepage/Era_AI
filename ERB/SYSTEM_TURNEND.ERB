@@ -1,0 +1,27 @@
+; SYSTEM_TURNEND.ERB
+; 行动结束、时间推进、简单结局判断
+; 说明：
+;   当前雨夜房间主要在剧本文件内推进时间。
+;   这里保留为通用回合结束入口，方便后续扩展其他命令。
+
+@EVENTTURNEND
+TIME += 1
+
+IF TIME >= 3
+    TIME = 0
+    DAY += 1
+    PRINTFORMW 进入第 {DAY} 天。
+ENDIF
+
+IF DAY > 7
+    CALL ENDING_NORMAL
+ENDIF
+
+RETURN
+
+
+@ENDING_NORMAL
+PRINTL
+PRINTW 一周过去了。
+PRINTW 这是最小模板的普通结局。
+BEGIN TITLE
