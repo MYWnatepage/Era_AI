@@ -1,0 +1,23 @@
+# Player data
+游戏/配置/
+游戏/数据/
+游戏/*.sav
+游戏/*.log
+游戏/profile
+游戏/setting.json
+游戏/emuera.config
+游戏/*.exe
+游戏/*.dll
+# Build and tooling
+**/bin/
+**/obj/
+**/artifacts/
+**/__pycache__/
+*.pdb
+*.user
+*.suo
+.vs/
+.idea/
+.artifacts/
+发布/
+备份/

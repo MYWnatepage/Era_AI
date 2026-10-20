@@ -1,0 +1,50 @@
+﻿; SAVESTR:60 stores a versioned full AI-history snapshot with the game save.
+@CAPTURE_RAIN_ROOM_AI_HISTORY
+RESULTS:0 '= "rain_room"
+AICONNECTION 20
+IF RESULT < 0
+    RETURN
+ENDIF
+SAVESTR:60 '= RESULTS:0
+RESULT = 1
+RETURN
+
+@NEW_RAIN_ROOM_AI_HISTORY
+RESULTS:0 '= "[]"
+RESULTS:1 '= "rain_room"
+AICONNECTION 21
+IF RESULT < 0
+    PRINTFORML %RESULTS:0%
+    WAIT
+    BEGIN TITLE
+ENDIF
+SAVESTR:60 '= "[]"
+RETURN
+
+@RESTORE_RAIN_ROOM_AI_HISTORY
+RESULTS:0 '= SAVESTR:60
+IF RESULTS:0 == ""
+    RESULTS:0 '= "[]"
+ENDIF
+RESULTS:1 '= "rain_room"
+AICONNECTION 21
+IF RESULT < 0
+    RETURN
+ENDIF
+IF SAVESTR:60 == ""
+    ; Old saves can only restore the dialogue actually present in that save.
+    FOR LOCAL, 50, 22, -3
+        IF SAVESTR:(LOCAL + 2) != "" && SAVESTR:LOCAL != ""
+            RESULTS:1 '= "rain_room"
+            RESULTS:2 '= SAVESTR:LOCAL
+            RESULTS:3 '= SAVESTR:(LOCAL + 1)
+            RESULTS:4 '= SAVESTR:(LOCAL + 2)
+            AICONNECTION 22
+            IF RESULT < 0
+                RETURN
+            ENDIF
+        ENDIF
+    NEXT
+ENDIF
+CALL CAPTURE_RAIN_ROOM_AI_HISTORY
+RETURN
