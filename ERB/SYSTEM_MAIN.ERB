@@ -1,0 +1,245 @@
+; SYSTEM_MAIN.ERB
+; 主入口、初始化、剧本选择
+; Edit 1.2
+;
+; 当前结构：
+;   标题页 [0] 开始新游戏
+;     ↓
+;   RESETDATA
+;     ↓
+;   BEGIN FIRST
+;     ↓
+;   @EVENTFIRST
+;     ↓
+;   初始化数据
+;     ↓
+;   剧本选择
+;     ↓
+;   雨夜房间
+;
+; 保存/读取说明：
+;   手动保存 / 读取采用 Emuera 原生：
+;       SAVEGAME
+;       LOADGAME
+;
+;   自动存档采用无提示写入：
+;       SAVEDATA 99, "自动存档：雨夜房间"
+;
+;   这样可以同时满足：
+;       1. 玩家手动保存时自己选择槽位。
+;       2. 自动存档不弹出保存界面。
+;       3. 99 号槽固定作为自动存档槽。
+
+
+; ==================================================
+; 新游戏入口
+; ==================================================
+@EVENTFIRST
+
+CALL INIT_NEWGAME
+CALL SCENARIO_SELECT
+
+RETURN
+
+
+
+; ==================================================
+; 新游戏初始化
+; ==================================================
+@INIT_NEWGAME
+
+DAY = 1
+TIME = 0
+MONEY = 1000
+
+; FLAG:0 = 好感度
+; FLAG:1 = 疲劳
+; FLAG:2 = 是否见过角色
+; FLAG:9 = 游戏结束标记
+FLAG:0 = 0
+FLAG:1 = 0
+FLAG:2 = 0
+FLAG:9 = 0
+
+; GLOBAL:500 = 当前剧本ID
+;   0 = 未选择
+;   1 = 雨夜房间
+;
+; GLOBAL:501 = 当前章节ID
+; GLOBAL:502 = 当前场景ID
+; GLOBAL:503 = 当前角色ID
+; GLOBAL:510 = 雨夜房间：对话轮数
+; GLOBAL:599 = 返回标题确认结果
+GLOBAL:500 = 0
+GLOBAL:501 = 0
+GLOBAL:502 = 0
+GLOBAL:503 = 0
+GLOBAL:510 = 0
+GLOBAL:599 = 0
+
+SAVEGLOBAL
+
+RETURN
+
+
+
+; ==================================================
+; 剧本选择器
+; ==================================================
+@SCENARIO_SELECT
+
+$SCENARIO_SELECT_MAIN
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 剧本选择 / Scenario Select
+ALIGNMENT LEFT
+DRAWLINE
+
+PRINTL 请选择要开始的剧本。
+DRAWLINE
+PRINTL [1] 雨夜房间        作者：Natepage        类型：短篇对话测试
+PRINTL [9] 返回标题
+
+$SCENARIO_SELECT_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 1
+        CALL START_SCENARIO_RAIN_ROOM
+        RETURN
+
+    CASE 9
+        CALL GAME_RETURN_TITLE_CONFIRM
+        IF GLOBAL:599 == 1
+            BEGIN TITLE
+        ENDIF
+        GOTO SCENARIO_SELECT_MAIN
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO SCENARIO_SELECT_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 雨夜房间启动
+; ==================================================
+@START_SCENARIO_RAIN_ROOM
+
+GLOBAL:500 = 1
+GLOBAL:501 = 0
+GLOBAL:502 = 0
+GLOBAL:503 = 1
+
+FLAG:2 = 1
+
+SAVEGLOBAL
+
+CALL SCENARIO_TEST_RAIN_ROOM_START
+
+RETURN
+
+
+
+; ==================================================
+; 返回标题确认
+; ==================================================
+@GAME_RETURN_TITLE_CONFIRM
+
+GLOBAL:599 = 0
+
+IF GLOBAL:301 == 0
+    GLOBAL:599 = 1
+    RETURN
+ENDIF
+
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 返回确认 / Return Confirm
+ALIGNMENT LEFT
+DRAWLINE
+PRINTL 确定要返回标题吗？
+PRINTL 当前未保存的流程可能会丢失。
+DRAWLINE
+PRINTL [1] 确定返回标题
+PRINTL [0] 取消
+
+$GAME_RETURN_TITLE_CONFIRM_INPUT
+INPUT
+
+SELECTCASE RESULT
+    CASE 1
+        GLOBAL:599 = 1
+        RETURN
+
+    CASE 0
+        GLOBAL:599 = 0
+        RETURN
+
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO GAME_RETURN_TITLE_CONFIRM_INPUT
+ENDSELECT
+
+
+
+; ==================================================
+; 自动存档
+; ==================================================
+@GAME_AUTOSAVE
+
+; GLOBAL:300 自动存档开关
+;   1 = 开
+;   0 = 关
+;
+; 手动保存 / 读取：
+;   剧本内 [4] 保存进度 使用 SAVEGAME
+;   剧本内 [5] 读取进度 使用 LOADGAME
+;
+; 自动存档：
+;   不弹出保存界面。
+;   固定写入 99 号槽。
+IF GLOBAL:300 == 1
+    SAVEDATA 99, "自动存档：雨夜房间"
+ENDIF
+
+RETURN
+
+
+
+; ==================================================
+; 旧存档兼容入口
+; ==================================================
+@SHOW_SHOP
+
+; 旧版存档可能仍然记录在 @SHOW_SHOP。
+; 这里保留兼容入口，避免读取旧存档时报错。
+CALL SCENARIO_SELECT
+
+RETURN
+
+
+
+; ==================================================
+; 存档信息
+; ==================================================
+@SAVEINFO
+
+SELECTCASE GLOBAL:500
+    CASE 1
+        PUTFORM 雨夜房间 第{DAY}天 好感度{FLAG:0}
+    CASEELSE
+        PUTFORM Era_AI 第{DAY}天
+ENDSELECT
+
+RETURN
