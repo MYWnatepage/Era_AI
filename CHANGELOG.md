@@ -1,0 +1,32 @@
+# 更新日志
+
+此日志记录 Era AI 的变化。旧上游运行器的更新记录保留在 `源码/Readme/`。
+
+## 未发布
+
+- 补充 CI、问题反馈与 PR 模板、贡献说明、许可范围说明及依赖更新配置。
+- 改进 README 导航、界面示例、FAQ、路线图和发布检查流程。
+- 固定 .NET SDK 选择范围与文本换行规则。
+
+## 0.2.1 Alpha — 2026-10-20
+
+- 同步内置 AI 运行器源码、游戏剧本和测试，替换主分支旧 Python Bridge 布局。
+- 更新 README 和使用说明，修复测试目录依赖与构建输出信息。
+- 发布标签与对应源码提交一致，提供干净 Windows x64 玩家包和校验文件。
+
+[完整说明](更新说明_0.2.1_Alpha.md) · [下载](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha)
+
+## 0.2.0 Alpha — 2026-10-20
+
+- AI 调用集成到运行器，重做模型连接、生成设置、显示交互和存档历史。
+- 增加已适配服务的余额、用量与七日图表。
+- 历史发布标签仍指向早期源码，自动生成的 Source code 与本版运行包不对应；需要匹配源码时请使用 0.2.1。保留原标签，不改写已发布历史。
+
+[发布记录](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.0-alpha)
+
+## 测试版本V 1.0 — 2026-06-30
+
+- 早期 Python Bridge 实验版本，使用当时的命名。
+- 单独提供已移除个人配置与存档的历史清理版；它不表示比 0.2.x 更新。
+
+[历史清理版](https://github.com/MYWnatepage/Era_AI/releases/tag/legacy-v1.0-test)

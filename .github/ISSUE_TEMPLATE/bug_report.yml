@@ -1,0 +1,55 @@
+name: Bug 反馈
+description: 报告可复现的功能、显示或连接问题。
+title: '[Bug] '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请勿上传 API 密钥、完整配置、个人存档或私人对话。截图和日志请先遮挡敏感内容；界面里显示的服务地址如有密钥参数也请删除。
+  - type: input
+    id: version
+    attributes:
+      label: Era AI 版本
+      placeholder: 例如 0.2.1 Alpha；如从源码运行，请附提交编号。
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      placeholder: Windows 版本、x64，以及发布包运行或源码构建。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从哪个菜单开始、依次做了什么、是否每次发生。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 可以附已遮挡敏感信息的截图或错误提示。
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: 服务与模型（涉及 AI 时填写）
+      description: 只填平台和模型名称，不填密钥或完整配置。
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已确认内容不包含密钥、私人对话或个人存档。
+          required: true

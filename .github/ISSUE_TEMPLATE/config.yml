@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 使用说明与常见问题
+    url: https://github.com/MYWnatepage/Era_AI/blob/master/docs/FAQ.md
+    about: 连接、费用、存档、源码构建等常见问题。

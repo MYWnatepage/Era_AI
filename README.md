@@ -2,17 +2,38 @@
 
 **版本：0.2.1 Alpha · 开发测试版**
 
+[![CI](https://github.com/MYWnatepage/Era_AI/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/MYWnatepage/Era_AI/actions/workflows/ci.yml)
+
+[下载游戏](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha) · [使用说明](使用说明.md) · [常见问题](docs/FAQ.md) · [反馈问题](https://github.com/MYWnatepage/Era_AI/issues/new/choose) · [开发路线](docs/ROADMAP.md) · [更新日志](CHANGELOG.md)
+
 一个基于 Era / Emuera 的 AI 文字游戏实验项目。
 
 Era AI 希望把传统 Era 游戏的规则与进度管理，同 AI 对话的变化性结合起来：由剧本管理人物状态、物品与事件结果，让 AI 负责更自然的对话和场景表达。
 
 目前提供「雨夜房间」测试剧本，用于验证自由输入、AI 回复、生成设置和存档流程。项目仍在持续开发，完整的卡片与事件系统尚未完成。
 
+![Era AI 主菜单界面示例](docs/images/main-menu.png)
+
+<details>
+<summary>查看设置界面示例</summary>
+
+![Era AI 设置界面示例](docs/images/settings.png)
+
+截图用于展示现有界面，设置值仅为示例。
+
+</details>
+
 ## 下载与启动
 
 前往 [Releases](https://github.com/MYWnatepage/Era_AI/releases) 下载游戏。
 
 当前版本：[Era AI 0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha)
+
+| 版本 | 用途 |
+| --- | --- |
+| [0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha) | 当前推荐的开发测试版，运行包与源码提交对应 |
+| [0.2.0 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.0-alpha) | 保留的前一发布；其自动源码下载与运行包不对应，详见发布页更正 |
+| [测试版本V 1.0 历史清理版](https://github.com/MYWnatepage/Era_AI/releases/tag/legacy-v1.0-test) | 早期 Python Bridge 版本，仅作历史留存 |
 
 1. 下载附件 **`Era-AI-v0.2.1-alpha-win-x64.zip`**。
 2. 完整解压到有写入权限的文件夹，不要在压缩包内直接运行。
@@ -115,7 +136,7 @@ API 密钥使用 Windows DPAPI 加密保存，换电脑或 Windows 账户后需�
 
 Era AI 基于 **Emuera.NET（EM+EE）** 修改。感谢 Emuera 及相关上游项目、依赖库的作者。
 
-运行器与各依赖的版权、许可归各自作者所有，相关原文随发布包保留在 `许可/` 文件夹中。
+运行器与各依赖的版权、许可归各自作者所有，相关原文随发布包保留在 `许可/` 文件夹中。 新增原创内容尚未选定统一的独立开源许可证，具体范围见 [LICENSE.md](LICENSE.md)。
 
 ## 从源码构建
 
@@ -131,3 +152,12 @@ Era AI 基于 **Emuera.NET（EM+EE）** 修改。感谢 Emuera 及相关上游�
 如需运行引擎集成测试，另外安装 Python 3，再执行 `./测试.ps1 -Engine`。测试在临时目录中使用独立游戏副本，不读取个人配置与存档。
 
 仓库中的 `源码/` 保存修改后的运行器与上游许可，`游戏/CSV` 和 `游戏/ERB` 保存游戏数据与剧本，`测试/` 保存核心和引擎回归测试。可执行文件及自带运行环境的玩家包通过 Releases 提供。
+
+## 仓库维护
+
+提交与 Pull Request 自动运行 Windows x64 构建和核心模拟测试，不使用真实 API 密钥。引擎集成测试与发布包检查按需要人工执行。
+
+- [贡献与提交流程](CONTRIBUTING.md)
+- [发布检查清单](docs/RELEASING.md)
+- [安全与隐私反馈](SECURITY.md)
+- [任务列表](https://github.com/MYWnatepage/Era_AI/issues) 与 [里程碑](https://github.com/MYWnatepage/Era_AI/milestones)
