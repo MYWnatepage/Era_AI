@@ -16,12 +16,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Product>Era AI</Product>
+        <Product>Era_AI</Product>
         <AssemblyName>EraAI</AssemblyName>
         <RootNamespace>MinorShift.Emuera</RootNamespace>
         <ApplicationManifest>emuera.manifest</ApplicationManifest>
-        <Version>0.2.1</Version>
-        <InformationalVersion>0.2.1-alpha</InformationalVersion>
+        <Version>0.3.0</Version>
+        <InformationalVersion>0.3.0</InformationalVersion>
         <Copyright>Copyright (C) 2008- MinorShift, 妊）|дﾟ)の中の人</Copyright>
     </PropertyGroup>
 
@@ -58,6 +58,8 @@
                 <InformationalVersion>$(InformationalVersion) NAudio</InformationalVersion>
             </PropertyGroup>
             <ItemGroup>
+      <EmbeddedResource Include="Assets/Music/Celtic Impulse.mp3" LogicalName="EraAI.Music.CelticImpulse.mp3" />
+      <EmbeddedResource Include="Assets/Music/Evening Fall - Harp.mp3" LogicalName="EraAI.Music.EveningFallHarp.mp3" />
               <Compile Remove="Runtime/Utils/Sound.WMP.cs" />
               <PackageReference Include="NAudio.Core" Version="2.2.1" />
               <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
@@ -133,6 +135,8 @@
     </Choose>
 
     <ItemGroup>
+      <!-- Kept as a source reference for migration comparisons; the player has no browser dependency. -->
+      <Compile Remove="NativeDisplay/SceneMapWebView.cs" />
       <PackageReference Include="Enums.NET" Version="4.0.2" />
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>

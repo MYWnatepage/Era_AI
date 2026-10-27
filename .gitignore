@@ -1,4 +1,4 @@
-# Player data
+﻿# Player data
 游戏/配置/
 游戏/数据/
 游戏/*.sav
@@ -21,3 +21,6 @@
 .artifacts/
 发布/
 备份/
+
+# Active game folder lock (removed automatically on exit).
+**/.era-ai-session.lock

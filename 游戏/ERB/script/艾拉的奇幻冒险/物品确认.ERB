@@ -1,0 +1,64 @@
+﻿; Unruled model operations are proposals. Rejecting a proposal keeps inventory,
+; elapsed time and both short/long dialogue history unchanged.
+@RAIN_ROOM_REVIEW_ITEMS, ARGS:0, ARGS:1, ARGS:2, ARGS:3
+LOCALS:0 '= ARGS:0
+LOCALS:1 '= ARGS:1
+LOCALS:2 '= ARGS:2
+LOCALS:3 '= ARGS:3
+LOCAL:19 = 0
+$RAIN_ROOM_REVIEW_ITEMS_REDRAW
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+DRAWLINE
+PRINTL 本轮剧情与状态变化
+DRAWLINE
+IF LOCAL:19 == 0
+    NARRATIVE LOCALS:0
+    $RAIN_ROOM_REVIEW_NARRATIVE_WAIT
+    NARRATIVEPOLL
+    IF RESULT == 0
+        TWAIT 16, 1
+        GOTO RAIN_ROOM_REVIEW_NARRATIVE_WAIT
+    ENDIF
+    LOCAL:19 = 1
+ELSE
+    PRINTFORML %LOCALS:0%
+ENDIF
+DRAWLINE
+PRINTL 拟执行的物品与人物状态变化：
+IF LOCALS:1 == ""
+    PRINTL 本轮没有可执行的物品或人物状态变更。
+ELSE
+    PRINTFORML %LOCALS:1%
+ENDIF
+IF LOCALS:3 != ""
+    CALL SETTING_ROW, "核对提示：", LOCALS:3, 0
+ENDIF
+PRINTL AI 提供的依据：
+PRINTFORML %LOCALS:2%
+DRAWLINE
+PRINTL 修改建议：核对获取来源、付款、数量及人物状态变化依据；不符合实际行动时取消本轮，再重新输入。
+PRINTL 使用说明：确认后才更新物品与人物状态、推进时间并记录剧情；取消本轮不改变进度。
+PRINTL [1] 采用本轮剧情与状态变化
+PRINTL [2] 查看当前物品
+PRINTL [3] 查看人物状态
+PRINTL [0] 取消本轮
+$RAIN_ROOM_REVIEW_ITEMS_INPUT
+ESCAPE 0
+INPUT
+SELECTCASE RESULT
+    CASE 1
+        RETURN 1
+    CASE 0
+        RETURN 0
+    CASE 2
+        CALL RAIN_ROOM_INVENTORY_PAGE
+        GOTO RAIN_ROOM_REVIEW_ITEMS_REDRAW
+    CASE 3
+        CALL RAIN_ROOM_STATUS_PAGE, 1
+        GOTO RAIN_ROOM_REVIEW_ITEMS_REDRAW
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO RAIN_ROOM_REVIEW_ITEMS_INPUT
+ENDSELECT

@@ -1,0 +1,70 @@
+﻿; 框架通用游戏说明，与具体剧本无关。
+
+@TITLE_HELP
+LOCAL:0 = 0
+$TITLE_HELP_PAGE
+REDRAW 0
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+
+DRAWLINE
+ALIGNMENT CENTER
+PRINTL 游戏说明
+ALIGNMENT LEFT
+DRAWLINE
+IF LOCAL:0 == 0
+CALL SETTING_WRAP, "本项目是一款 AI 文字冒险游戏，通过对话和选择推进故事。具体世界观、人物与玩法由所选剧本决定。", 0, 0
+DRAWLINE
+PRINTL 首次使用
+CALL SETTING_ROW, "步骤 1：", "打开“设置 → 模型连接设置”，选择网络 API 和服务地址。", 0
+CALL SETTING_ROW, "步骤 2：", "填写 API 密钥，读取模型列表并选择模型，再测试当前连接。", 0
+CALL SETTING_ROW, "步骤 3：", "返回主菜单，选择“开始新游戏”及剧本；已有进度可选择“读取存档”。", 0
+DRAWLINE
+PRINTL 基本操作
+CALL SETTING_ROW, "选择选项：", "点击带编号的选项，或输入编号后按 Enter。", 0
+CALL SETTING_ROW, "返回与取消：", "有上级的页面按 Esc 返回；输入文字或数值时，按 Esc 取消本次输入。", 0
+CALL SETTING_ROW, "编号说明：", "各页以实际标注为准；数字 0 通常用于返回，主菜单的数字 0 是开始新游戏。", 0
+CALL SETTING_ROW, "查看长页面：", "使用鼠标滚轮查看上方内容；在输入栏按 PageUp / PageDown 翻阅。", 0
+DRAWLINE
+PRINTL 保存与消耗
+CALL SETTING_ROW, "保存进度：", "在剧本操作页手动保存，也可在设置中开启自动存档；重要节点建议手动保存。", 0
+CALL SETTING_ROW, "等待回应：", "需要中止请求时按 Esc；已执行的行动如何结算，以当前剧本规则为准。", 0
+CALL SETTING_ROW, "用量与音乐：", "右上角图表查看本游戏近7日消耗，喇叭控制音乐；连接测试也可能产生调用费用。", 0
+DRAWLINE
+CALL SETTING_WRAP, "[1] 查看运行环境与接入要求", 0, 0
+ELSE
+DRAWLINE
+PRINTL 通用环境
+CALL SETTING_WRAP, "  ・Windows 10 / 11（64 位），运行所需组件已随游戏附带。", 0, 0
+CALL SETTING_WRAP, "  ・双击 EraAI.exe 启动，在“设置 → 模型连接设置”中配置模型。", 0, 0
+DRAWLINE
+CALL SETTING_WRAP, "方式一：API 接入（配置要求较低）", 0, 0
+CALL SETTING_WRAP, "  ・配置参考：普通四核处理器、8GB 内存，集成显卡即可。", 0, 0
+CALL SETTING_WRAP, "  ・填写兼容服务的地址、模型名称和 API 密钥，在游戏内选择对应方式。", 0, 0
+CALL SETTING_WRAP, "  ・需要稳定联网，可能产生调用费用；请妥善保管密钥。", 0, 0
+DRAWLINE
+CALL SETTING_WRAP, "方式二：本地大模型（配置要求较高）[未完成]", 0, 0
+CALL SETTING_WRAP, "  ・入门参考：6 核 12 线程、32GB 内存、8GB 显存，额外预留 50GB 空间。", 0, 0
+CALL SETTING_WRAP, "  ・进阶参考：64GB 内存、16GB 及以上显存，额外预留 100GB 空间。", 0, 0
+CALL SETTING_WRAP, "  ・先下载模型并启动兼容的本地服务，再填写服务地址和模型名称。", 0, 0
+CALL SETTING_WRAP, "  ・以上适用于选型参考，实际需求取决于模型大小、量化方式和上下文长度。", 0, 0
+DRAWLINE
+CALL SETTING_WRAP, "[1] 返回首次使用与操作说明", 0, 0
+ENDIF
+PRINTL [0] 返回标题
+REDRAW 1
+$TITLE_HELP_INPUT
+ESCAPE 0
+INPUT
+SELECTCASE RESULT
+    CASE 0
+        RETURN
+    CASE 1
+        LOCAL:0 = 1 - LOCAL:0
+        GOTO TITLE_HELP_PAGE
+    CASEELSE
+        CLEARLINE 1
+        REUSELASTLINE 输入无效，请重新选择。
+        GOTO TITLE_HELP_INPUT
+ENDSELECT
+RETURN

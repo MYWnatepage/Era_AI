@@ -27,8 +27,20 @@ internal static class UsageChartTests
         Check(days.Length == 7 && days[0].Day == new DateOnly(2026, 12, 27) && days[6].Day == new DateOnly(2027, 1, 2), "包含今天在内连续七天，跨年仍按北京时间排列");
         Check(days.Count(x => x.Record != null) == 4 && days[1].Record == null && days[6].Record!.Input == 1000, "缺少记录保留为空，范围外日期不混入图表");
         Check(store.SevenDays(account with { ProtectedKey = SecretProtection.Protect("another-chart-account") }).All(x => x.Record == null), "图表只读取当前 API 连接的记录");
+        foreach (var (width, height, line) in new[] { (640, 360, 18), (1024, 640, 32), (1920, 1080, 80) })
+        {
+            var area = new Rectangle(0, 0, width, height);
+            var speaker = MusicSpeakerButton.Bounds(area, line);
+            var shortcut = UsageChartButton.Bounds(area, line);
+            Check(shortcut.Top == speaker.Top && shortcut.Size == speaker.Size && shortcut.Right + 6 == speaker.Left && !shortcut.IntersectsWith(speaker),
+                "消耗图标与喇叭同尺寸对齐且不重叠，随窗口和行高保持右上角位置");
+        }
+        Check(UsageChartButton.Bounds(new(0, 0, 30, 80), 32).IsEmpty, "极窄区域隐藏消耗图标，避免覆盖喇叭");
         int closed = 0;
         var chart = new UsageChartPage(days, () => closed++);
+        Check(chart.ReturnLabel == "返回模型连接设置", "原有模型设置入口的返回说明保持正确");
+        var shortcutPage = new UsageChartPage(days, () => { }, "返回原页面", "当前未启用网络 API");
+        Check(shortcutPage.ReturnLabel == "返回原页面" && shortcutPage.Notice.Contains("网络 API"), "快捷入口提供原页面返回和未配置状态提示");
         Check(chart.Selected == 6 && !chart.Tokens, "图表默认查看今天及人民币花费区间");
         Check(chart.Value(1) == null && chart.Details(1).Contains("暂无"), "无记录日期不伪装成零花费");
         chart.Command(2);
@@ -54,6 +66,8 @@ internal static class UsageChartTests
             using var graphics = Graphics.FromImage(bitmap);
             var renderer = new UsageChartPage(sample, () => { });
             renderer.Draw(graphics, new Rectangle(0, 0, width, height), font, theme, 30);
+            UsageChartButton.Draw(graphics, UsageChartButton.Bounds(new(0, 0, width, height), 30), theme, true);
+            MusicSpeakerButton.Draw(graphics, MusicSpeakerButton.Bounds(new(0, 0, width, height), 30), theme, false, false);
             bitmap.Save(Path.Combine(preview, name + ".png"), ImageFormat.Png);
         }
         using (var bitmap = new Bitmap(1000, 650))
@@ -72,6 +86,14 @@ internal static class UsageChartTests
             Check(empty.Value(6) == null, "完全缺少用量的日期不绘制虚假的零 Token 点");
             empty.Draw(graphics, new Rectangle(0, 0, 1000, 650), font, new(), 30);
             bitmap.Save(Path.Combine(preview, "empty.png"), ImageFormat.Png);
+        }
+        using (var image = new Bitmap(300, 180))
+        using (var canvas = Graphics.FromImage(image))
+        {
+            canvas.Clear(Color.Magenta);
+            UsageChartButton.Draw(canvas, new(210, 12, 44, 44), new DisplayTheme(), false);
+            Check(image.GetPixel(0, 0).ToArgb() == Color.Magenta.ToArgb() && canvas.Transform.IsIdentity,
+                "消耗图标只绘制自身区域，恢复画布状态而不覆盖正文");
         }
         chart.MouseDown(new Point(20, 630)); chart.Command(0);
         Check(closed == 1, "退出图表只触发一次返回操作");

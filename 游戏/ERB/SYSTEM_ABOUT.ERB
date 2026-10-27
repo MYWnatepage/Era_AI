@@ -1,0 +1,47 @@
+﻿; 框架项目介绍、版本、作者和致谢，与具体剧本无关。
+
+@TITLE_ABOUT
+REDRAW 0
+CLEARLINE LINECOUNT
+CALL APPLY_DISPLAY_SETTINGS
+DRAWLINE
+PRINTFORML 关于 %GAMEBASE_TITLE%
+DRAWLINE
+PRINTFORML 版本：%GAMEBASE_VERSIONNAME%
+PRINTFORML 创作者：%GAMEBASE_AUTHOR%
+DRAWLINE
+PRINTL 项目介绍
+CALL SETTING_WRAP, "Era_AI 是一款通过自由输入与选择推进故事的 AI 文字冒险项目。", 0, 0
+CALL SETTING_WRAP, "游戏框架负责交互、规则结算与进度保存，AI 根据剧本设定和当前情境续写剧情。不同剧本可以拥有各自的世界、人物与玩法。", 0, 0
+DRAWLINE
+PRINTL 当前功能
+LOCAL:0 = HTML_STRINGLEN("人物与物品：　", 1)
+CALL SETTING_ROW, "剧本与进度：", "独立加载剧本，初始设定与游玩进度分别维护；支持手动和自动存档。", LOCAL:0
+CALL SETTING_ROW, "人物与物品：", "统一管理人物资料、物品描述、数量与归属，支持本局数据的新增、更新和保存。", LOCAL:0
+CALL SETTING_ROW, "地图与交互：", "原生三维地图支持旋转、缩放与路线规划，地点资料和移动规则可由剧本配置。", LOCAL:0
+CALL SETTING_ROW, "对话与记忆：", "保留历史对话与长期记忆，按当前行动提供相关资料，减少反复发送无关内容。", LOCAL:0
+CALL SETTING_ROW, "连接与显示：", "网络 API、模型选择与生成设置；自定义配色、字体、窗口及音乐，剧情支持一起显示或调速逐字显示。", LOCAL:0
+CALL SETTING_ROW, "用量记录：", "查看近7日 Token 用量与费用估算；余额查询及部分统计取决于所接入服务的支持。", LOCAL:0
+DRAWLINE
+PRINTL 后续方向
+CALL SETTING_WRAP, "继续打磨剧情连贯性、人物表现，以及长期记忆和状态变化的一致性。", 0, 0
+CALL SETTING_WRAP, "扩展框架能力与剧本支持，持续改善操作体验、性能和存档兼容。", 0, 0
+CALL SETTING_WRAP, "图片生成（未完成）：探索根据剧情生成场景、人物与物品图片。", 0, 0
+CALL SETTING_WRAP, "本地大模型接入（未完成）／流式回复（未完成）。", 0, 0
+DRAWLINE
+PRINTL 运行器与致谢
+CALL SETTING_WRAP, "基于 Emuera.NET（EM+EE）修改，AI 调用与原生地图等功能已集成到运行器中。", 0, 0
+CALL SETTING_WRAP, "感谢 MinorShift、上游贡献者及所使用依赖的作者。运行器与各依赖的版权、许可归各自作者所有。", 0, 0
+DRAWLINE
+PRINTL 版本说明
+CALL SETTING_WRAP, "0.3.0 是一次主要功能更新，整合独立剧本、原生地图、对话记忆与显示交互。具体改动请查看项目中的更新记录。", 0, 0
+DRAWLINE
+PRINTL [0] 返回标题
+REDRAW 1
+$NATIVE_ABOUT_INPUT
+ESCAPE 0
+INPUT
+IF RESULT != 0
+    GOTO NATIVE_ABOUT_INPUT
+ENDIF
+RETURN

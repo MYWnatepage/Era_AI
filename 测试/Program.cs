@@ -3,6 +3,108 @@ using System.Text;
 using System.Text.Json;
 using MinorShift.Emuera.NativeAI;
 
+if (args.Contains("--narrative-display-only")) { NarrativeDisplayTests.Run(); return; }
+int narrativeUiIndex = Array.IndexOf(args, "--narrative-display-ui");
+if (narrativeUiIndex >= 0)
+{
+    NarrativeDisplayIntegrationTests.Run(args[narrativeUiIndex + 1], args[narrativeUiIndex + 2], args[narrativeUiIndex + 3]);
+    return;
+}
+
+int resourceBarsUiIndex = Array.IndexOf(args, "--resource-bars-ui");
+if (resourceBarsUiIndex >= 0)
+{
+    ResourceBarsIntegrationTests.Run(args[resourceBarsUiIndex + 1], args[resourceBarsUiIndex + 2]);
+    return;
+}
+
+if (args.Contains("--fatigue-points-only"))
+{
+    FatiguePointTests.Run();
+    FatigueDicePenaltyTests.Run();
+    FatigueEffortTests.Run();
+    ResourceSlotMeterTests.Run();
+    return;
+}
+
+int importanceUiIndex = Array.IndexOf(args, "--character-importance-ui");
+if (importanceUiIndex >= 0)
+{
+    CharacterImportanceIntegrationTests.Run(args[importanceUiIndex + 1], args[importanceUiIndex + 2]);
+    return;
+}
+
+int semanticProbeIndex = Array.IndexOf(args, "--semantic-dialogue-live-api");
+if (semanticProbeIndex >= 0)
+{
+    await SemanticDialogueApiProbe.Run(args[semanticProbeIndex + 1], args[semanticProbeIndex + 2]);
+    return;
+}
+
+int qualityProbeIndex = Array.IndexOf(args, "--story-quality-live-api");
+if (qualityProbeIndex >= 0)
+{
+    await StoryQualityApiProbe.Run(args[qualityProbeIndex + 1], args[qualityProbeIndex + 2]);
+    return;
+}
+
+int routeMovementIndex = Array.IndexOf(args, "--route-movement-ui");
+if (routeMovementIndex >= 0)
+{
+    RouteMovementIntegrationTests.Run(args[routeMovementIndex + 1], args[routeMovementIndex + 2]);
+    return;
+}
+
+int nativeMapUiIndex = Array.IndexOf(args, "--scene-map-native-ui");
+if (nativeMapUiIndex >= 0)
+{
+    NativeSceneMapIntegrationTests.Run(args[nativeMapUiIndex + 1], args[nativeMapUiIndex + 2]);
+    return;
+}
+int sceneMapWebUiIndex = Array.IndexOf(args, "--scene-map-web-ui");
+if (sceneMapWebUiIndex >= 0)
+{
+    SceneMapWebIntegrationTests.Run(args[sceneMapWebUiIndex + 1], args[sceneMapWebUiIndex + 2]);
+    return;
+}
+
+int sceneMapUiIndex = Array.IndexOf(args, "--scene-map-ui");
+if (sceneMapUiIndex >= 0)
+{
+    SceneMapIntegrationTests.Run(args[sceneMapUiIndex + 1], args[sceneMapUiIndex + 2]);
+    return;
+}
+
+int navigationUiIndex = Array.IndexOf(args, "--navigation-profile-ui");
+if (navigationUiIndex >= 0)
+{
+    NavigationProfileIntegrationTests.Run(args[navigationUiIndex + 1], args[navigationUiIndex + 2]);
+    return;
+}
+
+int itemQuantityUiIndex = Array.IndexOf(args, "--item-quantity-ui");
+if (itemQuantityUiIndex >= 0)
+{
+    ItemQuantityInteractionTests.Run(args[itemQuantityUiIndex + 1], args[itemQuantityUiIndex + 2]);
+    return;
+}
+
+int inventoryGridUiIndex = Array.IndexOf(args, "--inventory-grid-ui");
+if (inventoryGridUiIndex >= 0)
+{
+    InventoryGridRenderIntegrationTests.Run(args[inventoryGridUiIndex + 1], args[inventoryGridUiIndex + 2]);
+    return;
+}
+
+int toolbarIndex = Array.IndexOf(args, "--toolbar-ui");
+int diceUiIndex=Array.IndexOf(args,"--dice-engine-ui");
+if(diceUiIndex>=0){DiceEngineIntegrationTests.Run(args[diceUiIndex+1],args[diceUiIndex+2],args.Contains("--cancel-dice"));return;}
+if (toolbarIndex >= 0)
+{
+    UsageToolbarIntegrationTests.Run(args[toolbarIndex + 1], args[toolbarIndex + 2]);
+    return;
+}
+
 int startupIndex = Array.IndexOf(args, "--startup-only");
 if (startupIndex >= 0 && startupIndex + 1 < args.Length)
 {
@@ -13,8 +115,58 @@ if (startupIndex >= 0 && startupIndex + 1 < args.Length)
     return;
 }
 
+InventoryGridTests.Run();
+ItemContextSelectionTests.Run();
+ScenarioActionAvailabilityTests.Run();
+CharacterOverviewTests.Run();
+SceneWorldTests.Run();
+SceneMapTests.Run();
+SceneMapDocumentTests.Run();
+NativeSceneWorldTests.Run();
+NativeMapRouteTests.Run();
+NativeMapTravelTests.Run();
+LocationActionTests.Run();
+LocalActionNarrationTests.Run();
+FatigueRecoveryTests.Run();
+FatiguePointTests.Run();
+FatigueDicePenaltyTests.Run();
+FatigueEffortTests.Run();
+ResourceSlotMeterTests.Run();
+NarrativeDisplayTests.Run();
+StatusSemanticsTests.Run();
+CharacterImportanceTests.Run();
+DynamicCharacterTests.Run();
+SceneDescriptionMigrationTests.Run();
+NarrativeMemoryTests.Run();
+ItemActionTests.Run();
+if(args.Contains("--story-system-only")) return;
+await ReplyFormatRegressionTests.Run();
+if (args.Contains("--reply-format-only")) return;
+await PromptAssemblyTests.Run();
+SceneContextTests.Run();
+if (args.Contains("--prompt-only")) return;
+PromptSelectionTests.Run();
+if (args.Contains("--prompt-selection-only")) return;
+await ReplyConsistencyTests.Run();
+if (args.Contains("--consistency-only")) return;
+CharacterStatusTests.Run();
+if (args.Contains("--status-only")) return;
+DiceAnimationTests.Run();
+if (args.Contains("--dice-only")) return;
+ScenarioIsolationTests.Run();
+if (args.Contains("--polish-only")) { ProjectPolishTests.Run(); return; }
+ProjectPolishTests.Run();
+
+if (args.Contains("--actions-only")) { ActionTests.Run(); return; }
+ActionTests.Run();
+
+if (args.Contains("--inventory-only")) { await InventoryTests.Run(); return; }
+await InventoryTests.Run();
+
 var directory = Path.Combine(Path.GetTempPath(), "EraAI-tests-" + Guid.NewGuid().ToString("N"));
 DisplaySafetyTests.Run();
+WindowSettingsTests.Run();
+MusicSettingsTests.Run();
 GameColorEditorTests.Run();
 if (args.Contains("--display-only")) return;
 ConnectionSettingsTests.Run();

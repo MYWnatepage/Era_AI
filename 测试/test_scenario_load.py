@@ -18,11 +18,12 @@ for case, selection, legacy in [('manual', 1, False), ('legacy_auto', 100, True)
     flow = stage / 'ERB/SYSTEM_SCENARIO_LOAD.ERB'
     text = flow.read_text(encoding='utf-8-sig')
     # Only the isolated test substitutes menu choices; production uses normal INPUT.
-    text = text.replace('ESCAPE 0\nINPUT', 'ESCAPE 0\nRESULT = 0', 1)
+    main = stage / 'ERB/SYSTEM_MAIN.ERB'
+    main.write_text(main.read_text(encoding='utf-8-sig').replace('ESCAPE 0\nINPUT', 'ESCAPE 0\nRESULT = 0', 1), encoding='utf-8-sig')
     text = text.replace('ESCAPE 0\nINPUT', f'ESCAPE 0\nRESULT = {selection}', 1)
     if case == 'wrong_scenario':
-        text = text.replace('    PRINTL 无法识别存档所属剧本，请选择其他存档。\n    WAIT\n    BEGIN TITLE', '    SAVETEXT "PASS scenario load", "load_pass.txt", 0, 1\n    QUIT')
-    text = text.replace('CALL SCENARIO_TEST_RAIN_ROOM_START\nBEGIN TITLE', '''IF DAY != 3 || FLAG:0 != 17 || SAVESTR:25 != "saved history"
+        text = text.replace('    PRINTL 无法识别存档所属剧本，请检查该剧本是否已安装且登记有效。\n    WAIT\n    BEGIN TITLE', '    SAVETEXT "PASS scenario load", "load_pass.txt", 0, 1\n    QUIT')
+    text = text.replace('CALL SCENARIO_CALL_HOOK, 3\nBEGIN TITLE', '''IF DAY != 3 || FLAG:0 != 17 || SAVESTR:25 != "saved history"
     THROW 读档没有恢复剧情数据
 ENDIF
 IF GLOBAL:500 != 1 || GLOBAL:510 != 1 || SAVESTR:0 != "rain_room"
@@ -31,6 +32,7 @@ ENDIF
 SAVETEXT "PASS scenario load", "load_pass.txt", 0, 1
 QUIT''')
     flow.write_text(text, encoding='utf-8-sig')
+    scenario_label = '雨夜房间' if legacy else '艾拉的奇幻冒险'
     test = '''@LOAD_FLOW_TEST
 CALL INIT_DISPLAY_SETTINGS
 CALL APPLY_DISPLAY_SETTINGS
@@ -46,9 +48,9 @@ FLAG:2 = 1
 GLOBAL:500 = 1
 SAVESTR:0 '= "{'other_scenario' if case == 'wrong_scenario' else '' if legacy else 'rain_room'}"
 SAVESTR:25 '= "saved history"
-SAVEDATA 0, "雨夜房间 第3天 好感度17"
+SAVEDATA 0, "2026/10/22 12:34:56 {scenario_label} 第3天 好感度17"
 SAVEDATA 1, "其他剧本 第3天"
-SAVEDATA 99, "自动存档：雨夜房间"
+SAVEDATA 99, "自动存档：{scenario_label}"
 CALL CHECK_RAIN_ROOM_SAVE(0)
 IF RESULT != 1
     THROW 未识别手动存档

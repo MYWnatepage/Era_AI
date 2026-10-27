@@ -105,6 +105,12 @@ static partial class Program
 		}
 
 		#endregion
+        GameDirectoryLease session;
+        try { session = GameDirectoryLease.Acquire(ExeDir); }
+        catch (InvalidOperationException e) { MessageBox.Show(e.Message, "Era_AI"); return; }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        { MessageBox.Show("无法写入游戏目录，请将游戏解压到可写入的文件夹后启动。", "Era_AI"); return; }
+        using var gameDirectorySession = session;
 		//エラー出力用
 		//1815 .exeが東方板のNGワードに引っかかるそうなので除去
 		ExeName = Path.GetFileNameWithoutExtension(AssemblyData.ExeName);

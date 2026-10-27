@@ -1,4 +1,4 @@
-﻿using MinorShift.Emuera.Runtime.Config;
+using MinorShift.Emuera.Runtime.Config;
 using MinorShift.Emuera.Runtime.Config.JSON;
 using System;
 using MinorShift.Emuera.NativeDisplay;
@@ -125,7 +125,7 @@ internal sealed class ConsoleStyledString : AConsoleColoredPart
 
         if (DisplayRuntime.Current != null)
         {
-            color = DisplayRuntime.ResolveText(color, isFocus);
+            color = DisplayRuntime.ResolveText(color, isFocus || StringStyle.ContextSelected);
             backcolor = DisplayRuntime.Current.BackgroundColor;
         }
 		#region EM_私家版_描画拡張
@@ -171,7 +171,7 @@ internal sealed class ConsoleStyledString : AConsoleColoredPart
 		else if (isBackLog && !colorChanged)
 			color = Config.LogColor;
 
-        color = DisplayRuntime.ResolveText(color, isSelecting);
+        color = DisplayRuntime.ResolveText(color, isSelecting || StringStyle.ContextSelected);
 		#region EM_私家版_描画拡張
 		if (mode == TextDrawingMode.GRAPHICS)
 			graph.DrawString(Text, Font, new SolidBrush(color), new Point(xOffset, 0));

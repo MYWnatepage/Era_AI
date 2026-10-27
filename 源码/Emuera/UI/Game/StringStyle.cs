@@ -1,4 +1,4 @@
-﻿using MinorShift.Emuera.Runtime.Config;
+using MinorShift.Emuera.Runtime.Config;
 using System.Drawing;
 
 namespace MinorShift.Emuera.UI.Game;
@@ -36,6 +36,8 @@ internal struct StringStyle
 			Fontname = fontname;
 	}
 
+	// Explicit context selections stay highlighted after the mouse moves away.
+	public bool ContextSelected = false;
 	public Color Color;
 	public Color ButtonColor;
 	public bool ColorChanged;
@@ -45,15 +47,15 @@ internal struct StringStyle
 	{
 		if (obj == null || obj is not StringStyle ss)
 			return false;
-		return Color == ss.Color && ButtonColor == ss.ButtonColor && ColorChanged == ss.ColorChanged && FontStyle == ss.FontStyle && Fontname.Equals(ss.Fontname, Config.SCIgnoreCase);
+		return Color == ss.Color && ButtonColor == ss.ButtonColor && ColorChanged == ss.ColorChanged && ContextSelected == ss.ContextSelected && FontStyle == ss.FontStyle && Fontname.Equals(ss.Fontname, Config.SCIgnoreCase);
 	}
 	public override int GetHashCode()
 	{
-		return Color.GetHashCode() ^ ButtonColor.GetHashCode() ^ ColorChanged.GetHashCode() ^ FontStyle.GetHashCode() ^ Fontname.GetHashCode();
+		return Color.GetHashCode() ^ ButtonColor.GetHashCode() ^ ColorChanged.GetHashCode() ^ ContextSelected.GetHashCode() ^ FontStyle.GetHashCode() ^ Fontname.GetHashCode();
 	}
 	public static bool operator ==(StringStyle x, StringStyle y)
 	{
-		return x.Color == y.Color && x.ButtonColor == y.ButtonColor && x.ColorChanged == y.ColorChanged && x.FontStyle == y.FontStyle && x.Fontname.Equals(y.Fontname, Config.SCIgnoreCase);
+		return x.Color == y.Color && x.ButtonColor == y.ButtonColor && x.ColorChanged == y.ColorChanged && x.ContextSelected == y.ContextSelected && x.FontStyle == y.FontStyle && x.Fontname.Equals(y.Fontname, Config.SCIgnoreCase);
 	}
 	public static bool operator !=(StringStyle x, StringStyle y)
 	{

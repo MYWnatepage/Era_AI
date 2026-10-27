@@ -1378,7 +1378,7 @@ internal sealed partial class VariableData
 		public DRAWLINESTR_Token(VariableCode varCode, VariableData varData)
 			: base(varCode, varData)
 		{
-			CanRestructure = true;
+			CanRestructure = false;
 		}
 		public override string GetStrValue(ExpressionMediator exm, long[] arguments)
 		{

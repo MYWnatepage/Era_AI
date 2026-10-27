@@ -9,58 +9,26 @@ AIGENERATION 0
 DRAWLINE
 PRINTL 采样设置
 DRAWLINE
-CALL GENERATION_COLUMN, "当前方案：", LOCAL:19 * 7
-PRINTFORML %RESULTS:0%
-CALL GENERATION_COLUMN, "实际应用：", LOCAL:19 * 7
-PRINTFORML %RESULTS:15%
-CALL GENERATION_COLUMN, "[1] 均衡", LOCAL:19 * 10
-CALL GENERATION_COLUMN, "随机程度 0.8 /", LOCAL:19 * 9
-CALL GENERATION_COLUMN, "核采样 1 /", LOCAL:19 * 7
-CALL GENERATION_COLUMN, "重复抑制 0 /", LOCAL:19 * 10
-PRINTL 话题扩展 0
-CALL GENERATION_COLUMN, "[2] 偏稳定", LOCAL:19 * 10
-CALL GENERATION_COLUMN, "随机程度 0.4 /", LOCAL:19 * 9
-CALL GENERATION_COLUMN, "核采样 1 /", LOCAL:19 * 7
-CALL GENERATION_COLUMN, "重复抑制 0 /", LOCAL:19 * 10
-PRINTL 话题扩展 0
-CALL GENERATION_COLUMN, "[3] 偏自由", LOCAL:19 * 10
-CALL GENERATION_COLUMN, "随机程度 1.1 /", LOCAL:19 * 9
-CALL GENERATION_COLUMN, "核采样 1 /", LOCAL:19 * 7
-CALL GENERATION_COLUMN, "重复抑制 0.15 /", LOCAL:19 * 10
-PRINTL 话题扩展 0.1
-CALL GENERATION_COLUMN, "[4] 自定义", LOCAL:19 * 10
-PRINTFORML 保留当前数值，点击下方参数逐项修改。
+CALL SETTING_ROW, "当前方案：", STRFORM("%RESULTS:0%"), LOCAL:19 * 7
+CALL SETTING_ROW, "实际应用：", STRFORM("%RESULTS:15%"), LOCAL:19 * 7
+CALL SETTING_PRESET_ROW, "[1] 均衡", "0.8", "1", "0", "0", LOCAL:19
+CALL SETTING_PRESET_ROW, "[2] 偏稳定", "0.4", "1", "0", "0", LOCAL:19
+CALL SETTING_PRESET_ROW, "[3] 偏自由", "1.1", "1", "0.15", "0.1", LOCAL:19
+CALL SETTING_ROW, "[4] 自定义", "保留当前数值，点击下方参数逐项修改。", LOCAL:19 * 10
 DRAWLINE
-LOCAL:18 = MAX(HTML_STRINGLEN(HTML_ESCAPE(STRFORM("当前：%RESULTS:4%")), 1), HTML_STRINGLEN(HTML_ESCAPE(STRFORM("当前：%RESULTS:5%")), 1), HTML_STRINGLEN(HTML_ESCAPE(STRFORM("当前：%RESULTS:6%")), 1), HTML_STRINGLEN(HTML_ESCAPE(STRFORM("当前：%RESULTS:7%")), 1)) + LOCAL:19
-CALL GENERATION_COLUMN, "[5] 随机程度", LOCAL:19 * 10
-CALL GENERATION_COLUMN, STRFORM("当前：%RESULTS:4%"), LOCAL:18
-PRINTL 范围：0～2
-CALL GENERATION_COLUMN, "[6] 核采样", LOCAL:19 * 10
-CALL GENERATION_COLUMN, STRFORM("当前：%RESULTS:5%"), LOCAL:18
-PRINTL 范围：大于 0 且不超过 1
-CALL GENERATION_COLUMN, "[7] 重复抑制", LOCAL:19 * 10
-CALL GENERATION_COLUMN, STRFORM("当前：%RESULTS:6%"), LOCAL:18
-PRINTL 范围：0～2
-CALL GENERATION_COLUMN, "[8] 话题扩展", LOCAL:19 * 10
-CALL GENERATION_COLUMN, STRFORM("当前：%RESULTS:7%"), LOCAL:18
-PRINTL 范围：0～2
-CALL GENERATION_COLUMN, "[9] 恢复默认", LOCAL:19 * 10
-PRINTFORML 将四项参数恢复为均衡方案的数值。
+CALL SETTING_ROW, "[5] 随机程度", STRFORM("当前：%RESULTS:4%") + " / " + "范围：0～2", LOCAL:19 * 10
+CALL SETTING_ROW, "[6] 核采样", STRFORM("当前：%RESULTS:5%") + " / " + "范围：大于 0 且不超过 1", LOCAL:19 * 10
+CALL SETTING_ROW, "[7] 重复抑制", STRFORM("当前：%RESULTS:6%") + " / " + "范围：0～2", LOCAL:19 * 10
+CALL SETTING_ROW, "[8] 话题扩展", STRFORM("当前：%RESULTS:7%") + " / " + "范围：0～2", LOCAL:19 * 10
+CALL SETTING_ROW, "[9] 恢复默认", "将四项参数恢复为均衡方案的数值。", LOCAL:19 * 10
 DRAWLINE
-CALL GENERATION_COLUMN, "方案区别：", LOCAL:19 * 7
-PRINTFORML 均衡适合日常对话；偏稳定倾向集中表达；偏自由增加表达变化与话题展开。
-CALL GENERATION_COLUMN, "随机程度：", LOCAL:19 * 7
-PRINTFORML 越低越倾向常见表达，越高变化越多，过高可能散乱。
-CALL GENERATION_COLUMN, "核采样：", LOCAL:19 * 7
-PRINTFORML 缩小数值会收窄候选表达，1 表示不额外按此项收窄；通常与随机程度择一调整。
-CALL GENERATION_COLUMN, "重复抑制：", LOCAL:19 * 7
-PRINTFORML 提高后更少反复使用已出现的词语，过高可能影响自然表达，0 为不抑制。
-CALL GENERATION_COLUMN, "话题扩展：", LOCAL:19 * 7
-PRINTFORML 提高后更倾向使用未出现的词语，可能带出新话题，也可能偏离当前内容，0 为不推动。
-CALL GENERATION_COLUMN, "修改建议：", LOCAL:19 * 7
-PRINTFORML 先选接近目标的方案，再点击参数修改；每次小幅调整一项，修改后自动标记自定义。
-CALL GENERATION_COLUMN, "使用说明：", LOCAL:19 * 7
-PRINTFORML 预设与自定义使用同一组参数；模型不支持的参数可能不会生效。
+CALL SETTING_ROW, "方案区别：", "均衡适合日常对话；偏稳定倾向集中表达；偏自由增加表达变化与话题展开。", LOCAL:19 * 7
+CALL SETTING_ROW, "随机程度：", "越低越倾向常见表达，越高变化越多，过高可能散乱。", LOCAL:19 * 7
+CALL SETTING_ROW, "核采样：", "缩小数值会收窄候选表达，1 表示不额外按此项收窄；通常与随机程度择一调整。", LOCAL:19 * 7
+CALL SETTING_ROW, "重复抑制：", "提高后更少反复使用已出现的词语，过高可能影响自然表达，0 为不抑制。", LOCAL:19 * 7
+CALL SETTING_ROW, "话题扩展：", "提高后更倾向使用未出现的词语，可能带出新话题，也可能偏离当前内容，0 为不推动。", LOCAL:19 * 7
+CALL SETTING_ROW, "修改建议：", "先选接近目标的方案，再点击参数修改；每次小幅调整一项，修改后自动标记自定义。", LOCAL:19 * 7
+CALL SETTING_ROW, "使用说明：", "预设与自定义使用同一组参数；模型不支持的参数可能不会生效。", LOCAL:19 * 7
 PRINTL [0] 返回设置
 REDRAW 1
 ESCAPE 0
@@ -81,7 +49,7 @@ SELECTCASE RESULT
         GOTO GEN_SAMPLING_PAGE
     CASE 5 TO 8
         LOCAL:0 = RESULT - 1
-        PRINTL 请输入新的数值，小数使用英文句点；留空或 Esc 取消。
+        CALL SETTING_WRAP, "请输入新的数值，小数使用英文句点；留空或 Esc 取消。", 0, 0
         INPUTS
         AIGENERATION LOCAL:0
         CALL MODEL_CONNECTION_ERROR
@@ -106,42 +74,25 @@ AIGENERATION 0
 DRAWLINE
 PRINTL 回复长度
 DRAWLINE
-CALL GENERATION_COLUMN, "当前长度：", LOCAL:19 * 7
-PRINTFORML %RESULTS:11% / 单次生成预算：%RESULTS:1%
-PRINTFORML %RESULTS:10%
-CALL GENERATION_COLUMN, "容量状态：", LOCAL:19 * 7
-PRINTFORML %RESULTS:13%
-CALL GENERATION_COLUMN, "[1] 简短", LOCAL:19 * 10
-PRINTFORML 以一小段自然对话为主。
-CALL GENERATION_COLUMN, "[2] 适中", LOCAL:19 * 10
-PRINTFORML 对话与必要动作，完整后自然结束。
-CALL GENERATION_COLUMN, "[3] 详细", LOCAL:19 * 10
-PRINTFORML 适当展开动作和氛围，避免重复凑字。
-CALL GENERATION_COLUMN, "[4] 自动预算", LOCAL:19 * 10
-PRINTFORML 使用模型默认输出预算。
-CALL GENERATION_COLUMN, "[5] 手动预算", LOCAL:19 * 10
-PRINTFORML 按当前模型设置 Token 上限。
-CALL GENERATION_COLUMN, "[6] 刷新容量", LOCAL:19 * 10
-PRINTL 重新查询当前模型的容量信息，不生成对话。
+CALL SETTING_ROW, "当前长度：", STRFORM("%RESULTS:11% / 单次生成预算：%RESULTS:1%"), LOCAL:19 * 7
+CALL SETTING_WRAP, STRFORM("%RESULTS:10%"), 0, 0
+CALL SETTING_ROW, "容量状态：", STRFORM("%RESULTS:13%"), LOCAL:19 * 7
+CALL SETTING_ROW, "[1] 简短", "以一小段自然对话为主。", LOCAL:19 * 10
+CALL SETTING_ROW, "[2] 适中", "对话与必要动作，完整后自然结束。", LOCAL:19 * 10
+CALL SETTING_ROW, "[3] 详细", "适当展开动作和氛围，避免重复凑字。", LOCAL:19 * 10
+CALL SETTING_ROW, "[4] 自动预算", "使用模型默认输出预算。", LOCAL:19 * 10
+CALL SETTING_ROW, "[5] 手动预算", "按当前模型设置 Token 上限。", LOCAL:19 * 10
+CALL SETTING_ROW, "[6] 刷新容量", "重新查询当前模型的容量信息，不生成对话。", LOCAL:19 * 10
 DRAWLINE
-CALL GENERATION_COLUMN, "简短：", LOCAL:19 * 7
-PRINTFORML 以一小段自然对话为主，减少铺陈；适合快速互动。
-CALL GENERATION_COLUMN, "适中：", LOCAL:19 * 7
-PRINTFORML 保留角色对话和必要动作，内容完整后自然结束；适合日常游玩。
-CALL GENERATION_COLUMN, "详细：", LOCAL:19 * 7
-PRINTFORML 允许展开动作与氛围描写，避免重复凑字；不保证固定字数。
-CALL GENERATION_COLUMN, "自动预算：", LOCAL:19 * 7
-PRINTFORML 使用模型默认输出额度，程序不设置统一的 Token 上限，也不保证低消耗。
-CALL GENERATION_COLUMN, "手动预算：", LOCAL:19 * 7
-PRINTFORML 限制单次输出的 Token 上限，实际生成可能更少；部分模型的思考内容也会占用额度。
-CALL GENERATION_COLUMN, "修改建议：", LOCAL:19 * 7
-PRINTFORML 先选适中，觉得太短或太长时再换详细或简短；需要控制单次消耗时再设手动预算。
-CALL GENERATION_COLUMN, "使用说明：", LOCAL:19 * 7
-PRINTFORML 回复长短是表达目标，Token 预算是输出上限，两者分别设置；手动输入 0 恢复自动。
-PRINT_SPACE LOCAL:19 * 7 px
-PRINTFORML 容量未获取表示当前没有可用信息，可点击本页“刷新容量”重新读取，部分信息仍可能未提供。
-PRINT_SPACE LOCAL:19 * 7 px
-PRINTFORML 已获取容量时据此校验，留空或 Esc 取消输入；达到预算时可能截断，不会自动重发。
+CALL SETTING_ROW, "简短：", "以一小段自然对话为主，减少铺陈；适合快速互动。", LOCAL:19 * 7
+CALL SETTING_ROW, "适中：", "保留角色对话和必要动作，内容完整后自然结束；适合日常游玩。", LOCAL:19 * 7
+CALL SETTING_ROW, "详细：", "允许展开动作与氛围描写，避免重复凑字；不保证固定字数。", LOCAL:19 * 7
+CALL SETTING_ROW, "自动预算：", "使用模型默认输出额度，程序不设置统一的 Token 上限，也不保证低消耗。", LOCAL:19 * 7
+CALL SETTING_ROW, "手动预算：", "限制单次输出的 Token 上限，实际生成可能更少；部分模型的思考内容也会占用额度。", LOCAL:19 * 7
+CALL SETTING_ROW, "修改建议：", "先选适中，觉得太短或太长时再换详细或简短；需要控制单次消耗时再设手动预算。", LOCAL:19 * 7
+CALL SETTING_ROW, "使用说明：", "回复长短是表达目标，Token 预算是输出上限，两者分别设置；手动输入 0 恢复自动。", LOCAL:19 * 7
+CALL SETTING_ROW, "", "容量未获取表示当前没有可用信息，可点击本页“刷新容量”重新读取，部分信息仍可能未提供。", LOCAL:19 * 7
+CALL SETTING_ROW, "", "已获取容量时据此校验，留空或 Esc 取消输入；达到预算时可能截断，不会自动重发。", LOCAL:19 * 7
 PRINTL [0] 返回设置
 REDRAW 1
 ESCAPE 0
@@ -162,7 +113,7 @@ SELECTCASE RESULT
         RESULTS:0 '= "0"
         AIGENERATION 1
     CASE 5
-        PRINTL 请输入当前模型的生成预算（正整数，0 为自动），留空或 Esc 取消。
+        CALL SETTING_WRAP, "请输入当前模型的生成预算（正整数，0 为自动），留空或 Esc 取消。", 0, 0
         INPUTS
         AIGENERATION 1
     CASE 6
@@ -187,38 +138,23 @@ AIGENERATION 0
 DRAWLINE
 PRINTL 上下文管理
 DRAWLINE
-CALL GENERATION_COLUMN, "当前上下文：", LOCAL:19 * 7
-PRINTFORML %RESULTS:2%
-CALL GENERATION_COLUMN, "当前历史：", LOCAL:19 * 7
-PRINTFORML %RESULTS:3% 轮
-PRINTFORML %RESULTS:10%
-CALL GENERATION_COLUMN, "容量状态：", LOCAL:19 * 7
-PRINTFORML %RESULTS:13%
-CALL GENERATION_COLUMN, "[1] 自动上下文", LOCAL:19 * 10
-PRINTFORML 按已获取的模型容量管理对话。
-CALL GENERATION_COLUMN, "[2] 手动上下文", LOCAL:19 * 10
-PRINTFORML 为当前模型设置输入与输出总预算。
-CALL GENERATION_COLUMN, "[3] 历史对话轮数", LOCAL:19 * 10
-PRINTFORML 控制最多发送多少轮过往对话。
-CALL GENERATION_COLUMN, "[4] 刷新容量", LOCAL:19 * 10
-PRINTL 重新查询当前模型的容量信息，不生成对话。
+CALL SETTING_ROW, "当前上下文：", STRFORM("%RESULTS:2%"), LOCAL:19 * 7
+CALL SETTING_ROW, "当前历史：", STRFORM("%RESULTS:3% 轮"), LOCAL:19 * 7
+CALL SETTING_WRAP, STRFORM("%RESULTS:10%"), 0, 0
+CALL SETTING_ROW, "容量状态：", STRFORM("%RESULTS:13%"), LOCAL:19 * 7
+CALL SETTING_ROW, "[1] 自动上下文", "按已获取的模型容量管理对话。", LOCAL:19 * 10
+CALL SETTING_ROW, "[2] 手动上下文", "为当前模型设置输入与输出总预算。", LOCAL:19 * 10
+CALL SETTING_ROW, "[3] 历史对话轮数", "控制最多发送多少轮过往对话。", LOCAL:19 * 10
+CALL SETTING_ROW, "[4] 刷新容量", "重新查询当前模型的容量信息，不生成对话。", LOCAL:19 * 10
 DRAWLINE
-CALL GENERATION_COLUMN, "自动上下文：", LOCAL:19 * 7
-PRINTFORML 按已获取的模型容量筛选历史；未获取容量时只按历史轮数筛选，仍可能超限。
-CALL GENERATION_COLUMN, "手动上下文：", LOCAL:19 * 7
-PRINTFORML 设置当前请求的输入与输出总预算，包含当前设定、输入、历史及手动预留的输出空间。
-CALL GENERATION_COLUMN, "历史对话轮数：", LOCAL:19 * 7
-PRINTFORML 限制最多携带多少轮过往对话；一轮包含玩家输入与角色回复，0 表示不发送历史。
-CALL GENERATION_COLUMN, "容量信息：", LOCAL:19 * 7
-PRINTFORML 上下文容量是输入与输出合计限制；输入限制、最大输出分别限制输入和输出，未获取不代表无限。
-CALL GENERATION_COLUMN, "修改建议：", LOCAL:19 * 7
-PRINTFORML 先用自动模式和适量历史；需要更多近期对话时增加轮数，消耗过高或超限时减少轮数。
-CALL GENERATION_COLUMN, "使用说明：", LOCAL:19 * 7
-PRINTFORML 空间不足时优先裁掉较早的整轮历史，保留当前设定与输入；裁剪采用估算，不是模型精确分词。
-PRINT_SPACE LOCAL:19 * 7 px
-PRINTFORML 手动输出预算会预留空间，自动输出的默认额度未知；调整发送的历史不会修改剧本存档。
-PRINT_SPACE LOCAL:19 * 7 px
-PRINTFORML 可点击本页“刷新容量”重新读取容量；手动预算输入 0 恢复自动，留空或 Esc 取消。
+CALL SETTING_ROW, "自动上下文：", "按已获取的模型容量筛选历史；未获取容量时只按历史轮数筛选，仍可能超限。", LOCAL:19 * 7
+CALL SETTING_ROW, "手动上下文：", "设置当前请求的输入与输出总预算，包含当前设定、输入、历史及手动预留的输出空间。", LOCAL:19 * 7
+CALL SETTING_ROW, "历史对话轮数：", "限制最多携带多少轮过往对话；一轮包含玩家输入与角色回复，0 表示不发送历史。", LOCAL:19 * 7
+CALL SETTING_ROW, "容量信息：", "上下文容量是输入与输出合计限制；输入限制、最大输出分别限制输入和输出，未获取不代表无限。", LOCAL:19 * 7
+CALL SETTING_ROW, "修改建议：", "先用自动模式和适量历史；需要更多近期对话时增加轮数，消耗过高或超限时减少轮数。", LOCAL:19 * 7
+CALL SETTING_ROW, "使用说明：", "空间不足时优先裁掉较早的整轮历史，保留当前设定与输入；裁剪采用估算，不是模型精确分词。", LOCAL:19 * 7
+CALL SETTING_ROW, "", "手动输出预算会预留空间，自动输出的默认额度未知；调整发送的历史不会修改剧本存档。", LOCAL:19 * 7
+CALL SETTING_ROW, "", "可点击本页“刷新容量”重新读取容量；手动预算输入 0 恢复自动，留空或 Esc 取消。", LOCAL:19 * 7
 PRINTL [0] 返回设置
 REDRAW 1
 ESCAPE 0
@@ -230,11 +166,11 @@ SELECTCASE RESULT
         RESULTS:0 '= "0"
         AIGENERATION 2
     CASE 2
-        PRINTL 请输入当前模型的上下文总预算（正整数，0 为自动），留空或 Esc 取消。
+        CALL SETTING_WRAP, "请输入当前模型的上下文总预算（正整数，0 为自动），留空或 Esc 取消。", 0, 0
         INPUTS
         AIGENERATION 2
     CASE 3
-        PRINTL 请输入最多发送的历史轮数（0～64），留空或 Esc 取消。
+        CALL SETTING_WRAP, "请输入最多发送的历史轮数（0～64），留空或 Esc 取消。", 0, 0
         INPUTS
         AIGENERATION 3
     CASE 4
@@ -259,37 +195,22 @@ AIGENERATION 0
 DRAWLINE
 PRINTL 思考模式
 DRAWLINE
-CALL GENERATION_COLUMN, "当前模式：", LOCAL:19 * 7
-PRINTFORML %RESULTS:8%
-CALL GENERATION_COLUMN, "[1] 跟随模型", LOCAL:19 * 10
-PRINTFORML 使用模型自身的思考设置。
-CALL GENERATION_COLUMN, "[2] 关闭优先", LOCAL:19 * 10
-PRINTFORML 尝试关闭思考；无法关闭时尝试低强度。
-CALL GENERATION_COLUMN, "[3] 低强度", LOCAL:19 * 10
-PRINTFORML 优先减少思考耗时。
-CALL GENERATION_COLUMN, "[4] 中强度", LOCAL:19 * 10
-PRINTFORML 在耗时与思考程度之间取中间选择。
-CALL GENERATION_COLUMN, "[5] 高强度", LOCAL:19 * 10
-PRINTFORML 可能增加耗时及输出用量。
+CALL SETTING_ROW, "当前模式：", STRFORM("%RESULTS:8%"), LOCAL:19 * 7
+CALL SETTING_ROW, "[1] 跟随模型", "使用模型自身的思考设置。", LOCAL:19 * 10
+CALL SETTING_ROW, "[2] 关闭优先", "尝试关闭思考；无法关闭时尝试低强度。", LOCAL:19 * 10
+CALL SETTING_ROW, "[3] 低强度", "优先减少思考耗时。", LOCAL:19 * 10
+CALL SETTING_ROW, "[4] 中强度", "在耗时与思考程度之间取中间选择。", LOCAL:19 * 10
+CALL SETTING_ROW, "[5] 高强度", "可能增加耗时及输出用量。", LOCAL:19 * 10
 DRAWLINE
-CALL GENERATION_COLUMN, "跟随模型：", LOCAL:19 * 7
-PRINTFORML 使用模型自身的默认思考设置，适合不确定如何调整时使用。
-CALL GENERATION_COLUMN, "关闭优先：", LOCAL:19 * 7
-PRINTFORML 尝试关闭思考；无法完全关闭且支持调节时，尝试使用低强度。
-CALL GENERATION_COLUMN, "低强度：", LOCAL:19 * 7
-PRINTFORML 倾向减少思考投入和等待时间，适合一般角色对话。
-CALL GENERATION_COLUMN, "中强度：", LOCAL:19 * 7
-PRINTFORML 尝试兼顾思考投入与等待时间，不同模型实际可用的档位可能不同。
-CALL GENERATION_COLUMN, "高强度：", LOCAL:19 * 7
-PRINTFORML 允许更多思考投入，可能增加耗时与用量，也不保证回复一定更好。
-CALL GENERATION_COLUMN, "修改建议：", LOCAL:19 * 7
-PRINTFORML 日常对话先用跟随模型或关闭优先，复杂推理需要时再提高强度，并比较耗时与回复质量。
-CALL GENERATION_COLUMN, "使用说明：", LOCAL:19 * 7
-PRINTFORML 思考强度不等于回复长短；思考内容可能占用输出预算，预算太小时可能挤占最终回复空间。
-PRINT_SPACE LOCAL:19 * 7 px
-PRINTFORML 模型不支持指定强度或完全关闭时，会使用可用档位或默认设置，保存选项不代表一定生效。
-PRINT_SPACE LOCAL:19 * 7 px
-PRINTFORML %RESULTS:9%
+CALL SETTING_ROW, "跟随模型：", "使用模型自身的默认思考设置，适合不确定如何调整时使用。", LOCAL:19 * 7
+CALL SETTING_ROW, "关闭优先：", "尝试关闭思考；无法完全关闭且支持调节时，尝试使用低强度。", LOCAL:19 * 7
+CALL SETTING_ROW, "低强度：", "倾向减少思考投入和等待时间，适合一般角色对话。", LOCAL:19 * 7
+CALL SETTING_ROW, "中强度：", "尝试兼顾思考投入与等待时间，不同模型实际可用的档位可能不同。", LOCAL:19 * 7
+CALL SETTING_ROW, "高强度：", "允许更多思考投入，可能增加耗时与用量，也不保证回复一定更好。", LOCAL:19 * 7
+CALL SETTING_ROW, "修改建议：", "日常对话先用跟随模型或关闭优先，复杂推理需要时再提高强度，并比较耗时与回复质量。", LOCAL:19 * 7
+CALL SETTING_ROW, "使用说明：", "思考强度不等于回复长短；思考内容可能占用输出预算，预算太小时可能挤占最终回复空间。", LOCAL:19 * 7
+CALL SETTING_ROW, "", "模型不支持指定强度或完全关闭时，会使用可用档位或默认设置，保存选项不代表一定生效。", LOCAL:19 * 7
+CALL SETTING_ROW, "", STRFORM("%RESULTS:9%"), LOCAL:19 * 7
 PRINTL [0] 返回设置
 REDRAW 1
 ESCAPE 0
@@ -315,18 +236,12 @@ CALL MODEL_CONNECTION_ERROR
 GOTO GEN_THINKING_PAGE
 RETURN
 
-@GENERATION_COLUMN, ARGS, ARG
-; Use actual font measurements instead of variable-width spaces.
-PRINTFORM %ARGS%
-PRINT_SPACE MAX(0, ARG - HTML_STRINGLEN(HTML_ESCAPE(ARGS), 1)) px
-RETURN
-
 @GENERATION_REFRESH_LIMITS
 CLEARLINE LINECOUNT
 DRAWLINE
 PRINTL 刷新模型容量
 DRAWLINE
-PRINTL 正在读取，按 Esc 取消；本操作不生成对话。
+CALL SETTING_WRAP, "正在读取，按 Esc 取消；本操作不生成对话。", 0, 0
 AICONNECTION 8
 IF RESULT < 0
     CALL MODEL_CONNECTION_ERROR

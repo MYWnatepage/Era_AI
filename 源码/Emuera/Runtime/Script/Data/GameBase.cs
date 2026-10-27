@@ -110,6 +110,7 @@ internal sealed class GameBase
 				pos = new ScriptPosition(eReader.Filename, eReader.LineNo);
 				switch (tokens[0])
 				{
+					case "游戏标识":
 					case "コード":
 						if (tryatoi(tokens[1], out ScriptUniqueCode))
 						{
@@ -117,6 +118,7 @@ internal sealed class GameBase
 								ParserMediator.Warn(trerror.SaveCodeIs0.Text, pos, 0);
 						}
 						break;
+					case "存档版本":
 					case "バージョン":
 						ScriptVersionDefined = tryatoi(tokens[1], out ScriptVersion);
 						break;
@@ -129,6 +131,7 @@ internal sealed class GameBase
 					case "アイテムなし":
 						tryatoi(tokens[1], out DefaultNoItem);
 						break;
+					case "游戏名称":
 					case "タイトル":
 						ScriptTitle = tokens[1];
 						break;
@@ -141,6 +144,7 @@ internal sealed class GameBase
 					case "追加情報":
 						ScriptDetail = tokens[1];
 						break;
+					case "窗口标题":
 					case "ウィンドウタイトル":
 						ScriptWindowTitle = tokens[1];
 						break;
@@ -164,6 +168,7 @@ internal sealed class GameBase
 					case "バージョン情報URL":
 						UpdateCheckURL = tokens[1];
 						break;
+					case "版本名称":
 					case "バージョン名":
 						VersionName = tokens[1];
 						break;

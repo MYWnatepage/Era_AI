@@ -520,7 +520,6 @@ internal sealed partial class FunctionIdentifier
 				throw new CodeEE(trerror.MissingArg.Text);
 			else
 				rowStr = st.Substring();
-			rowStr = GlobalStatic.Console.getStBar(rowStr);
 			Argument ret = new ExpressionArgument(new SingleStrTerm(rowStr))
 			{
 				ConstStr = rowStr,
@@ -533,7 +532,7 @@ internal sealed partial class FunctionIdentifier
 		{
 			if (GlobalStatic.Process.SkipPrint)
 				return;
-			GlobalStatic.Console.printCustomBar(func.Argument.ConstStr, true);
+			GlobalStatic.Console.printCustomBar(func.Argument.ConstStr, false);
 			exm.Console.NewLine();
 		}
 	}

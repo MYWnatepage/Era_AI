@@ -115,7 +115,7 @@ internal sealed class EraDataReader : IDisposable
 				break;
 			if (i >= array.Length)//配列を超えて保存されていても動じないで読み飛ばす。
 				continue;
-			array[i] = str;
+			array[i] = SaveStringCodec.Decode(str);
 		}
 		for (; i < array.Length; i++)//保存されている値が無いなら""に初期化
 			array[i] = "";
@@ -276,7 +276,7 @@ internal sealed class EraDataReader : IDisposable
 					throw new FileEE(trerror.InvalidSaveDataFormat.Text);
 				if (str.Equals(FINISHER, StringComparison.Ordinal))
 					break;
-				valueList.Add(str);
+				valueList.Add(SaveStringCodec.Decode(str));
 			}
 			ret.TryAdd(key, valueList);
 		}
@@ -523,7 +523,7 @@ internal sealed class EraDataWriter : IDisposable
 			if (array[i] == null)
 				writer.WriteLine("");
 			else
-				writer.WriteLine(array[i]);
+				writer.WriteLine(SaveStringCodec.Encode(array[i]));
 		}
 		writer.WriteLine(FINISHER);
 	}
@@ -599,7 +599,7 @@ internal sealed class EraDataWriter : IDisposable
 			if (array[i] == null)
 				writer.WriteLine("");
 			else
-				writer.WriteLine(array[i]);
+				writer.WriteLine(SaveStringCodec.Encode(array[i]));
 		}
 		writer.WriteLine(FINISHER);
 	}

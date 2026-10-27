@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -63,10 +63,10 @@ internal sealed class ConversationStore(string directory)
         }
     }
     public void Clear(string scenario) { lock (gate) Write(scenario, []); }
-    public string Display(string scenario)
+    public string Display(string scenario, string replyLabel = "回应")
     {
         var turns = Read(scenario);
-        return turns.Count == 0 ? "目前还没有长期记忆。" : string.Join("\n\n", turns.TakeLast(20).Select(t => $"{t.Time}\n你：{t.Player}\n艾拉：{t.Reply}"));
+        return turns.Count == 0 ? "目前还没有对话上下文。" : string.Join("\n\n", turns.TakeLast(20).Select(t => $"{t.Time}\n你：{t.Player}\n{replyLabel}：{t.Reply}"));
     }
     public List<ConversationTurn> Context(string scenario, int budget)
     {

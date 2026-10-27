@@ -1770,8 +1770,8 @@ internal sealed class VariableEvaluator : IDisposable
 
 
 	private static string getSaveDataPathG() { return Config.Config.SavDir + "global.sav"; }
-	private static string getSaveDataPath(int index) { return string.Create(CultureInfo.InvariantCulture, $"{Config.Config.SavDir}save{index:00}.sav"); }
-	private static string getSaveDataPath(string s) { return $"{Config.Config.SavDir}save{s:00}.sav"; }
+	private static string getSaveDataPath(int index, bool writing = false) { return MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.Resolve(Config.Config.SavDir, string.Create(CultureInfo.InvariantCulture, $"save{index:00}.sav"), writing); }
+	private static string getSaveDataPath(string s) { return MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.Resolve(Config.Config.SavDir, $"save{s:00}.sav"); }
 
 	private static string getSaveDataPathV(int index) { return Program.DatDir + string.Format("var_{0:00}.dat", index); }
 	private static string getSaveDataPathC(int index) { return Program.DatDir + string.Format("chara_{0:00}.dat", index); }
@@ -1850,7 +1850,15 @@ internal sealed class VariableEvaluator : IDisposable
 			case EraSaveFileType.CharVar:
 				filename = getSaveDataPathC(savename); break;
 		}
-		return CheckDataByFilename(filename, type);
+		var checkedData = CheckDataByFilename(filename, type);
+        if (type == EraSaveFileType.Normal && checkedData.State == EraDataState.OK &&
+            MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.IsLegacy(Config.Config.SavDir, filename) &&
+            MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.LegacyHeaderMatches is { } matches && !matches(checkedData.DataMes))
+        {
+            checkedData.State = EraDataState.FILENOTFOUND;
+            checkedData.DataMes = "----";
+        }
+        return checkedData;
 	}
 
 	public EraDataResult CheckData(int saveIndex, EraSaveFileType type)
@@ -1867,7 +1875,15 @@ internal sealed class VariableEvaluator : IDisposable
 			case EraSaveFileType.CharVar:
 				filename = getSaveDataPathC(saveIndex); break;
 		}
-		return CheckDataByFilename(filename, type);
+		var checkedData = CheckDataByFilename(filename, type);
+        if (type == EraSaveFileType.Normal && checkedData.State == EraDataState.OK &&
+            MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.IsLegacy(Config.Config.SavDir, filename) &&
+            MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.LegacyHeaderMatches is { } matches && !matches(checkedData.DataMes))
+        {
+            checkedData.State = EraDataState.FILENOTFOUND;
+            checkedData.DataMes = "----";
+        }
+        return checkedData;
 	}
 
 	public EraDataResult CheckDataByFilename(string filename, EraSaveFileType type)
@@ -2396,13 +2412,14 @@ internal sealed class VariableEvaluator : IDisposable
 
 	public bool SaveTo(int saveIndex, string saveText)
 	{
-		string filepath = getSaveDataPath(saveIndex);
+		string filepath = getSaveDataPath(saveIndex, true);
 		FileStream fs = null;
 		EraDataWriter writer = null;
 		EraBinaryDataWriter bWriter = null;
 		try
 		{
 			Config.Config.CreateSavDir();
+            Directory.CreateDirectory(Path.GetDirectoryName(filepath));
 			fs = new FileStream(filepath, FileMode.Create, FileAccess.Write);
 			if (Config.Config.SystemSaveInBinary)
 			{

@@ -1,4 +1,4 @@
-﻿using MinorShift.Emuera.GameView;
+using MinorShift.Emuera.GameView;
 using MinorShift.Emuera.Runtime.Config;
 using MinorShift.Emuera.Runtime.Utils;
 using MinorShift.Emuera.Runtime.Utils.EvilMask;
@@ -282,7 +282,7 @@ internal sealed class ConsoleButtonString
 		//	css.DrawTo(graph, pointY, isSelecting, isBackLog, mode);
 
 		//Bitmap Cache
-		if (ParentLine.bitmapCacheEnabled && strArray.Length > 1)
+		if (ParentLine.bitmapCacheEnabled && strArray.Length > 1 && strArray.All(part => part is ConsoleStyledString))
 		{
 			if (bitmapCache == null)
 			{

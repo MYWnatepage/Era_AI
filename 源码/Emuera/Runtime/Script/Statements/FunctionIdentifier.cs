@@ -77,7 +77,8 @@ internal sealed partial class FunctionIdentifier
 	}
 	static FunctionIdentifier()
 	{
-		foreach (var code in new[] { FunctionCode.DISPLAYCONFIG, FunctionCode.DISPLAYAPPLY, FunctionCode.DISPLAYINFO, FunctionCode.DISPLAYSTATE, FunctionCode.DISPLAYTYPE, FunctionCode.ESCAPE })
+        addFunction(FunctionCode.MUSIC, new NativeMusicInstruction());
+		foreach (var code in new[] { FunctionCode.DISPLAYCONFIG, FunctionCode.DISPLAYAPPLY, FunctionCode.DISPLAYINFO, FunctionCode.DISPLAYSTATE, FunctionCode.DISPLAYTYPE, FunctionCode.ESCAPE, FunctionCode.NARRATIVE, FunctionCode.NARRATIVEPOLL })
 			addFunction(code, new NativeDisplayInstruction(code));
 		foreach (var code in new[] { FunctionCode.AISTART, FunctionCode.AIPOLL, FunctionCode.AICANCEL, FunctionCode.AICONFIG, FunctionCode.AIINFO, FunctionCode.AIMEMORY, FunctionCode.AICLEAR, FunctionCode.AICONNECTION, FunctionCode.AIGENERATION })
 			addFunction(code, new NativeAIInstruction(code));

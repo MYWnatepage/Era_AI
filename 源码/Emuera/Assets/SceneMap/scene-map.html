@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>场景地图</title></head><body>
+<div id="era-map-study">
+  <section class="era-map-window" aria-label="场景地图">
+    <header class="era-map-header">
+      <span>场景地图</span>
+      <span class="era-current">当前地点：尚未确认</span>
+    </header>
+    <div class="era-map-stage">
+      <canvas class="era-map-canvas" role="img" aria-label="可旋转的立体山地地图。可使用地点名称按钮查看介绍。">立体地形与地点预览</canvas>
+      <div class="era-map-labels" aria-label="已知地点"></div>
+      <div class="era-marker-tag era-marker-current">当前位置</div>
+      <div class="era-marker-tag era-marker-destination">目的地</div>
+      <div class="era-map-instruments">
+        <div class="era-map-scale" aria-label="视图中心的参考比例尺"><span class="era-scale-caption">中心示意比例尺</span><div class="era-scale-bar"></div><div class="era-scale-values"><span>0</span><span class="era-scale-distance">100 米</span></div></div>
+        <span class="era-map-hint">拖动旋转 · 滚轮缩放</span>
+      </div>
+      <div class="era-compass" role="img" aria-label="随视角转动的指南针">
+        <svg viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="23" class="era-compass-ring"/><g class="era-compass-needle"><path d="M42 20 L37 43 L42 39 L47 43 Z" class="era-compass-north"/><path d="M42 64 L37 41 L42 45 L47 41 Z" class="era-compass-south"/></g><text class="era-compass-n" text-anchor="middle">北</text><text class="era-compass-e" text-anchor="middle">东</text><text class="era-compass-s" text-anchor="middle">南</text><text class="era-compass-w" text-anchor="middle">西</text></svg>
+      </div>
+      <p class="era-map-error" role="alert" hidden></p>
+    </div>
+    <div class="era-map-detail">
+      <div class="era-detail-heading"><h3>地点资料</h3><span class="era-detail-current">当前位置</span></div>
+      <p class="era-detail-description"></p>
+      <div class="era-detail-footer"><div class="era-detail-facilities"></div><button type="button" class="era-set-destination cursor-interaction">标记目的地</button></div>
+      <div class="era-detail-extra"></div><div class="era-coordinate-caption">示意坐标 · 米 · 仅供地图参考</div>
+    </div>
+    <footer class="era-map-footer"><button type="button" class="era-return cursor-interaction">[0] 返回行动菜单</button></footer>
+    <span class="era-status" role="status" aria-live="polite"></span>
+  </section>
+</div>
+<style>
+#era-map-study{width:100%;padding:0;--era-bg:#0f0f12;--era-fg:#dcdcdc;--era-focus:#ffff00;font-family:"Microsoft YaHei UI","PingFang SC",sans-serif;color:var(--era-fg)}
+#era-map-study *{box-sizing:border-box}
+#era-map-study [hidden]{display:none!important}
+#era-map-study .era-map-window{background:var(--era-bg);overflow:hidden}
+#era-map-study .era-map-header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 22px 14px;font-size:16px;font-weight:500}
+#era-map-study .era-current{font-size:12px;font-weight:400;opacity:.72}
+#era-map-study .era-map-stage{position:relative;width:100%;height:clamp(360px,58vw,600px);overflow:hidden;background:var(--era-bg);touch-action:none}
+#era-map-study .era-map-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#era-map-study .era-map-canvas:active{cursor:grabbing}
+#era-map-study .era-map-labels{position:absolute;inset:0;pointer-events:none}
+#era-map-study .era-location{position:absolute;left:0;top:0;display:block;background:color-mix(in srgb,var(--era-bg) 68%,transparent);border:0;border-bottom:1px solid color-mix(in srgb,var(--era-fg) 25%,transparent);border-radius:0;color:var(--era-fg);font:400 12px/1.4 "Microsoft YaHei UI","PingFang SC",sans-serif;white-space:nowrap;padding:3px 6px;pointer-events:auto;transform:translate(-50%,-50%)}
+#era-map-study .era-location:hover,#era-map-study .era-location[data-active="true"]{color:var(--era-focus);border-bottom-color:var(--era-focus)}
+#era-map-study .era-marker-tag{position:absolute;padding:3px 7px;white-space:nowrap;font-size:12px;border-left:2px solid currentColor;background:color-mix(in srgb,var(--era-bg) 88%,transparent);pointer-events:none;transform:translate(6px,-50%)}
+#era-map-study .era-marker-current{color:var(--era-fg)}
+#era-map-study .era-marker-destination{color:var(--era-focus)}
+#era-map-study .era-map-instruments{position:absolute;left:22px;bottom:15px;display:flex;flex-direction:column;gap:13px;pointer-events:none}
+#era-map-study .era-map-scale{font-size:11px;width:110px;color:var(--era-fg);filter:drop-shadow(0 1px 2px var(--era-bg))}
+#era-map-study .era-scale-caption{display:block;margin-bottom:7px;opacity:.72}
+#era-map-study .era-scale-bar{height:5px;border:1px solid var(--era-fg);background:linear-gradient(90deg,var(--era-fg) 0%,var(--era-fg) 50%,var(--era-bg) 50%,var(--era-bg) 100%)}
+#era-map-study .era-scale-values{display:flex;justify-content:space-between;margin-top:4px}
+#era-map-study .era-map-hint{font-size:11px;opacity:.55}
+#era-map-study .era-compass{position:absolute;right:19px;bottom:21px;width:84px;height:84px;pointer-events:none;color:var(--era-fg);filter:drop-shadow(0 1px 2px var(--era-bg))}
+#era-map-study .era-compass svg{width:100%;height:100%;overflow:visible}
+#era-map-study .era-compass-ring{fill:color-mix(in srgb,var(--era-bg) 65%,transparent);stroke:color-mix(in srgb,var(--era-fg) 40%,transparent);stroke-width:1}
+#era-map-study .era-compass text{fill:var(--era-fg);font-size:11px}
+#era-map-study .era-compass-north{fill:var(--era-focus)}
+#era-map-study .era-compass-south{fill:color-mix(in srgb,var(--era-fg) 50%,var(--era-bg))}
+#era-map-study .era-map-detail{margin:0 22px;padding:18px 0 22px;border-top:1px solid color-mix(in srgb,var(--era-focus) 65%,transparent)}
+#era-map-study .era-detail-heading{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;min-height:26px}
+#era-map-study .era-detail-heading h3{font-size:17px;line-height:1.5;font-weight:500;margin:0;color:var(--era-focus)}
+#era-map-study .era-detail-current{font-size:11px;color:var(--era-fg);opacity:.65}
+#era-map-study .era-detail-description{font-size:14px;line-height:1.85;margin:8px 0 9px;min-height:52px}
+#era-map-study .era-detail-facilities{font-size:12px;line-height:1.7;opacity:.65;min-height:21px}
+#era-map-study .era-detail-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+#era-map-study .era-set-destination{font:inherit;font-size:12px;color:var(--era-fg);border:1px solid color-mix(in srgb,var(--era-fg) 38%,transparent);background:var(--era-bg);padding:6px 10px;border-radius:0}
+#era-map-study .era-set-destination:hover:enabled{color:var(--era-focus);border-color:var(--era-focus)}
+#era-map-study .era-set-destination:disabled{opacity:.5;cursor:default}
+#era-map-study .era-coordinate-caption{font-size:11px;opacity:.5;margin-top:13px}
+#era-map-study .era-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+#era-map-study .era-map-error{position:absolute;inset:36% 10% auto;margin:0;text-align:center;font-size:14px}
+@media(max-width:450px){#era-map-study .era-map-header{padding:14px 14px 10px;gap:6px}#era-map-study .era-current{font-size:11px}#era-map-study .era-map-detail{margin:0 14px;padding:15px 0 17px}#era-map-study .era-location{font-size:11px;padding:3px 4px}#era-map-study .era-map-instruments{left:14px}#era-map-study .era-compass{right:12px;bottom:17px}#era-map-study .era-marker-tag{font-size:11px}#era-map-study .era-detail-heading h3{font-size:15px}}
+@media(pointer:coarse){#era-map-study .era-location{min-height:44px}#era-map-study .era-set-destination{min-height:44px}}
+
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}
+#era-map-study{height:100%}
+#era-map-study .era-map-window{height:100%;display:grid;grid-template-rows:auto minmax(0,7fr) minmax(0,3fr) auto}
+#era-map-study .era-map-header{padding:12px 22px 8px;flex:none}
+#era-map-study .era-map-stage{min-height:0;height:auto}
+#era-map-study .era-map-detail{min-height:0;min-width:0;max-height:none;overflow-y:scroll;overflow-x:hidden;scrollbar-gutter:stable;overflow-anchor:none;padding:12px 0;scrollbar-width:thin}
+#era-map-study .era-detail-description{min-height:0;margin:7px 0;line-height:1.7}
+#era-map-study .era-detail-extra{font-size:12px;opacity:.8}
+#era-map-study .era-detail-extra p{margin:6px 0;line-height:1.6}
+#era-map-study .era-coordinate-caption{margin-top:8px}
+#era-map-study .era-scale-caption{white-space:nowrap}
+#era-map-study .era-map-footer{padding:4px 22px 10px;flex:none}
+#era-map-study .era-return{font:inherit;font-size:14px;color:var(--era-fg);background:transparent;border:0;padding:4px 0}
+#era-map-study .era-return:hover{color:var(--era-focus)}
+</style>
+<script>
+/*__INPUT__*/
+/*__WORLD__*/
+</script>
+<script>
+(()=>{
+'use strict';
+const root=document.getElementById('era-map-study');
+const canvas=root.querySelector('canvas'),stage=root.querySelector('.era-map-stage');
+const world=window.EraMapWorld,input=window.EraSceneMapInput;
+const labelHost=root.querySelector('.era-map-labels'),heading=root.querySelector('h3'),description=root.querySelector('.era-detail-description');
+const facilities=root.querySelector('.era-detail-facilities'),current=root.querySelector('.era-detail-current'),status=root.querySelector('.era-status');
+const destinationButton=root.querySelector('.era-set-destination'),currentTag=root.querySelector('.era-marker-current'),destinationTag=root.querySelector('.era-marker-destination');
+const scaleHost=root.querySelector('.era-map-scale'),scaleValue=root.querySelector('.era-scale-distance'),compassNeedle=root.querySelector('.era-compass-needle');
+const settings={background:input.palette.background,foreground:input.palette.foreground,focus:input.palette.focus,grid:.50};
+const camera={yaw:-.43,elevation:.82,distance:112,target:[0,3,1]};
+let selected=input.currentId||world.sites[0]?.id||0,hover=0,mvp,invVP,eye=[0,0,0],width=1,height=1,dpr=1,scheduled=false,viewDirty=true,idDirty=true;
+const currentSite=world.sites.find(s=>s.id===input.currentId),metres=world.metersPerUnit||10;
+let destination=null,markerBufferDirty=true;
+let mouse=null,drag=null,moved=false,ready=false;
+const labels=new Map();
+const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:false});
+if(!gl||!world){window.chrome?.webview?.postMessage({type:'error'});return;}
+const derivatives=gl.getExtension('OES_standard_derivatives');
+const vert=`attribute vec3 aPosition;attribute vec3 aNormal;attribute float aOwner;attribute vec3 aBary;
+uniform mat4 uMVP;varying vec3 vWorld;varying vec3 vNormal;varying float vOwner;varying vec3 vBary;
+void main(){vWorld=aPosition;vNormal=aNormal;vOwner=aOwner;vBary=aBary;gl_Position=uMVP*vec4(aPosition,1.0);}`;
+const frag=`${derivatives?'#extension GL_OES_standard_derivatives : enable':''}
+precision highp float;varying vec3 vWorld;varying vec3 vNormal;varying float vOwner;varying vec3 vBary;
+uniform vec3 uBG,uFG,uFocus,uEye;uniform float uActive,uMode,uPick,uGrid;
+void main(){if(uPick>0.5){gl_FragColor=vec4(max(0.0,vOwner)/255.0,0.0,0.0,1.0);return;}
+vec3 n=normalize(vNormal);float diffuse=max(0.0,dot(n,normalize(vec3(.20,.88,-.42))));
+float nearFactor=1.0-smoothstep(135.0,250.0,distance(uEye,vWorld));
+float extent=max(abs(vWorld.x),abs(vWorld.z));float edgeVisibility=1.0-smoothstep(77.0+3.0*sin(vWorld.x*.047+vWorld.z*.031),108.0,extent);
+float shade=.018+.18*diffuse;vec3 colour=mix(uBG,uFG,shade);
+if(uMode<.5){
+${derivatives?'vec3 fw=fwidth(vBary)*.80;vec3 sm=smoothstep(vec3(0.0),fw,vBary);float wire=1.0-min(sm.x,min(sm.y,sm.z));colour=mix(colour,mix(uBG,uFG,.43),wire*uGrid);':''}
+}else if(uMode<1.5){colour=mix(uBG,uFG,.14+.22*diffuse);}
+else if(uMode<2.5){float wave=sin(vWorld.z*3.0+sin(vWorld.x*2.8));colour=mix(uBG,uFG,.26+.04*wave);}
+else {colour=mix(uBG,uFG,.12+.045*diffuse);}
+colour=mix(uBG,colour,(.35+.65*nearFactor)*edgeVisibility);gl_FragColor=vec4(colour,1.0);}`;
+const lineVert=`attribute vec3 aPosition;attribute float aOwner;uniform mat4 uMVP;varying float vOwner;varying vec3 vWorld;
+void main(){vOwner=aOwner;vWorld=aPosition;gl_Position=uMVP*vec4(aPosition,1.0);}`;
+const lineFrag=`precision highp float;varying float vOwner;varying vec3 vWorld;uniform vec3 uBG,uFG,uFocus,uEye;uniform float uActive;
+void main(){bool active=abs(vOwner-uActive)<.1&&uActive>.5;bool present=vOwner<-.5&&vOwner>-1.5;bool target=vOwner<-1.5;float f=1.0-smoothstep(160.0,260.0,distance(uEye,vWorld));
+float extent=max(abs(vWorld.x),abs(vWorld.z));float edgeVisibility=1.0-smoothstep(77.0+3.0*sin(vWorld.x*.047+vWorld.z*.031),108.0,extent);
+vec3 c=present?uFG:(active||target?uFocus:mix(uBG,uFG,.60));gl_FragColor=vec4(mix(uBG,c,(.45+.55*f)*edgeVisibility),1.0);}`;
+function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
+function program(v,f){const p=gl.createProgram();gl.attachShader(p,shader(gl.VERTEX_SHADER,v));gl.attachShader(p,shader(gl.FRAGMENT_SHADER,f));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));return p;}
+const solidProgram=program(vert,frag),edgeProgram=program(lineVert,lineFrag);
+function uniforms(p,names){const out={};for(const n of names)out[n]=gl.getUniformLocation(p,n);return out;}
+const U=uniforms(solidProgram,['uMVP','uBG','uFG','uFocus','uEye','uActive','uMode','uPick','uGrid']);
+const E=uniforms(edgeProgram,['uMVP','uBG','uFG','uFocus','uEye','uActive']);
+function makeMesh(source){const data=[];for(let i=0;i<source.length;i+=7){for(let j=0;j<7;j++)data.push(source[i+j]);const k=(i/7)%3;data.push(k===0?1:0,k===1?1:0,k===2?1:0);}const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);return{buffer:b,count:data.length/10};}
+function makeLines(source){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(source),gl.STATIC_DRAW);return{buffer:b,count:source.length/4};}
+const terrain=makeMesh(world.terrain),solids=makeMesh(world.solids),water=makeMesh(world.river||[]),roads=makeMesh(world.routes||[]);
+const edgeData=Array.from(world.edges||[]).slice(derivatives?(world.terrainEdgeFloatCount||0):0);
+const edges=makeLines(edgeData);
+const markers=makeLines([]);
+function currentBase(){return currentSite?world.heightAt(currentSite.x,currentSite.z)+(currentSite.markerHeight??.38):0;}
+function targetBase(){return destination?world.heightAt(destination.x,destination.z)+(destination.markerHeight??.38):0;}
+function updateMarkers(){const data=[];function add(x,z,y,owner){for(let i=0;i<48;i++){const a=i*Math.PI/24,b=(i+1)*Math.PI/24;data.push(x+Math.cos(a)*1.35,y,z+Math.sin(a)*1.35,owner,x+Math.cos(b)*1.35,y,z+Math.sin(b)*1.35,owner);}data.push(x,y,z,owner,x,y+13,z,owner);}if(currentSite)add(currentSite.x,currentSite.z,currentBase(),-1);if(destination)add(destination.x,destination.z,targetBase(),-2);gl.bindBuffer(gl.ARRAY_BUFFER,markers.buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);markers.count=data.length/4;markerBufferDirty=false;}
+const fbo=gl.createFramebuffer(),pickTex=gl.createTexture(),depth=gl.createRenderbuffer();
+function vecSub(a,b){return a.map((v,i)=>v-b[i]);}function dot(a,b){return a.reduce((n,v,i)=>n+v*b[i],0);}function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}function norm(a){const n=Math.hypot(...a);return a.map(x=>x/n);}
+function multiply(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)o[c*4+r]+=a[k*4+r]*b[c*4+k];return o;}
+function perspective(fov,aspect,near,far){let f=1/Math.tan(fov/2),d=1/(near-far);return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*d,-1,0,0,2*far*near*d,0]);}
+function lookAt(e,t){const z=norm(vecSub(e,t)),x=norm(cross([0,1,0],z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,e),-dot(y,e),-dot(z,e),1]);}
+function invert(a){const rows=Array.from({length:4},(_,r)=>Array.from({length:8},(_,c)=>c<4?a[c*4+r]:(c-4===r?1:0)));for(let c=0;c<4;c++){let pivot=c;for(let r=c+1;r<4;r++)if(Math.abs(rows[r][c])>Math.abs(rows[pivot][c]))pivot=r;[rows[pivot],rows[c]]=[rows[c],rows[pivot]];const d=rows[c][c];if(Math.abs(d)<1e-12)return null;for(let j=0;j<8;j++)rows[c][j]/=d;for(let r=0;r<4;r++)if(r!==c){const q=rows[r][c];for(let j=0;j<8;j++)rows[r][j]-=q*rows[c][j];}}return new Float32Array(Array.from({length:16},(_,i)=>rows[i%4][Math.floor(i/4)+4]));}
+function transform(m,p){const o=[];for(let r=0;r<4;r++)o[r]=m[r]*p[0]+m[4+r]*p[1]+m[8+r]*p[2]+m[12+r]*(p[3]??1);return o;}
+function colour(hex){return[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255);}
+function palette(){root.style.setProperty('--era-bg',settings.background);root.style.setProperty('--era-fg',settings.foreground);root.style.setProperty('--era-focus',settings.focus);}
+function setUniforms(u){gl.uniformMatrix4fv(u.uMVP,false,mvp);gl.uniform3fv(u.uBG,colour(settings.background));gl.uniform3fv(u.uFG,colour(settings.foreground));gl.uniform3fv(u.uFocus,colour(settings.focus));gl.uniform3fv(u.uEye,eye);gl.uniform1f(u.uActive,world.sites.find(s=>s.id===(hover||selected))?.renderId||0);}
+function attr(p,name,size,stride,offset){const loc=gl.getAttribLocation(p,name);if(loc>=0){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,stride,offset);}}
+function drawMesh(mesh,mode){if(!mesh.count)return;gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);attr(solidProgram,'aPosition',3,40,0);attr(solidProgram,'aNormal',3,40,12);attr(solidProgram,'aOwner',1,40,24);attr(solidProgram,'aBary',3,40,28);gl.uniform1f(U.uMode,mode);gl.drawArrays(gl.TRIANGLES,0,mesh.count);}
+function scene(pick){gl.useProgram(solidProgram);setUniforms(U);gl.uniform1f(U.uPick,pick?1:0);gl.uniform1f(U.uGrid,settings.grid);gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);drawMesh(terrain,0);drawMesh(water,2);drawMesh(roads,3);drawMesh(solids,1);gl.disable(gl.POLYGON_OFFSET_FILL);if(!pick){gl.useProgram(edgeProgram);setUniforms(E);for(const mesh of [edges,markers]){gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);attr(edgeProgram,'aPosition',3,16,0);attr(edgeProgram,'aOwner',1,16,12);gl.drawArrays(gl.LINES,0,mesh.count);}}}
+function resize(){const bounds=stage.getBoundingClientRect();width=Math.max(1,bounds.width);height=Math.max(1,bounds.height);dpr=Math.min(window.devicePixelRatio||1,2);const w=Math.round(width*dpr),h=Math.round(height*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.bindTexture(gl.TEXTURE_2D,pickTex);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);gl.bindRenderbuffer(gl.RENDERBUFFER,depth);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,w,h);gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,pickTex,0);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,depth);gl.bindFramebuffer(gl.FRAMEBUFFER,null);viewDirty=true;}}
+function updateCamera(){const distance=camera.distance*Math.max(1,Math.sqrt(1.65/(width/height))),c=Math.cos(camera.elevation)*distance;eye=[camera.target[0]+Math.sin(camera.yaw)*c,camera.target[1]+Math.sin(camera.elevation)*distance,camera.target[2]+Math.cos(camera.yaw)*c];mvp=multiply(perspective(.70,width/height,.5,450),lookAt(eye,camera.target));invVP=invert(mvp);viewDirty=false;idDirty=true;}
+function project(x,y,z){const p=transform(mvp,[x,y,z,1]);if(p[3]<=0)return null;return{x:(p[0]/p[3]*.5+.5)*width,y:(.5-p[1]/p[3]*.5)*height};}
+function floorPoint(x,y){if(!invVP)return null;const nx=x/width*2-1,ny=1-y/height*2;const a=transform(invVP,[nx,ny,-1,1]),b=transform(invVP,[nx,ny,1,1]);const p=a.slice(0,3).map(v=>v/a[3]),q=b.slice(0,3).map(v=>v/b[3]);let previous=0;for(let i=1;i<=140;i++){const t=i/140,r=p.map((v,k)=>v+(q[k]-v)*t);if(r[1]<=world.heightAt(r[0],r[2])){let lo=previous,hi=t;for(let j=0;j<12;j++){const mid=(lo+hi)/2,m=p.map((v,k)=>v+(q[k]-v)*mid);if(m[1]>world.heightAt(m[0],m[2]))lo=mid;else hi=mid;}const point=p.map((v,k)=>v+(q[k]-v)*hi),bounds=world.bounds;if(bounds&&(point[0]<bounds.minX||point[0]>bounds.maxX||point[2]<bounds.minZ||point[2]>bounds.maxZ))return null;return point;}previous=t;}return null;}
+function inside(polygon,x,z){let yes=false;for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){const a=polygon[i],b=polygon[j];if((a[1]>z)!==(b[1]>z)&&x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0])yes=!yes;}return yes;}
+function pick(x,y){const pixel=new Uint8Array(4);gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.readPixels(Math.max(0,Math.min(canvas.width-1,Math.round(x*dpr))),Math.max(0,Math.min(canvas.height-1,Math.round((height-y)*dpr))),1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixel);gl.bindFramebuffer(gl.FRAMEBUFFER,null);let id=world.renderIdToSiteId[pixel[0]]||0;if(!world.sites.some(s=>s.id===id)){id=0;const p=floorPoint(x,y);if(p){for(const s of world.sites){if(s.outline?.length&&inside(s.outline,p[0],p[2])){id=s.id;break;}if(!s.outline&&Math.hypot(p[0]-s.x,p[2]-s.z)<s.radius){id=s.id;break;}}}}return id;}
+function coordinates(x,z){return [Math.round((x-world.origin.x)*metres),Math.round((world.origin.z-z)*metres)];}
+function coordinateText(x,z){return '（'+coordinates(x,z).join(', ')+ '）';}
+function siteTitle(site){return site.name+coordinateText(site.x,site.z);}
+let lastDetailId=null,lastDestinationId=null;
+function showDetails(){
+ const site=world.sites.find(s=>s.id===(hover||selected));
+ const detailId=site?.id||0,destinationId=destination?.siteId||0;
+ if(detailId===lastDetailId&&destinationId===lastDestinationId)return;
+ const changedSite=detailId!==lastDetailId;lastDetailId=detailId;lastDestinationId=destinationId;
+ heading.textContent=site?siteTitle(site):'尚未记录地点';description.textContent=site?.description||'';
+ facilities.textContent=site?.facilities?.join(' · ')||'';current.hidden=!site||(site.id!==input.currentId&&site.id!==destination?.siteId);current.textContent=site?.id===input.currentId?'当前位置':'目的地预览';
+ destinationButton.hidden=!site;destinationButton.disabled=!site||site.id===input.currentId||site.id===destination?.siteId;destinationButton.textContent=site?.id===input.currentId?'当前位置':site?.id===destination?.siteId?'已标记目的地':'标记目的地';destinationButton.dataset.siteId=site?.id||0;
+ const extra=root.querySelector('.era-detail-extra');extra.replaceChildren();
+ if(site){for(const text of [site.adjacent?.length?'相邻地点：'+site.adjacent.join('、'):'',site.people?.length?'这里的人物：'+site.people.join('、'):'',...(site.conditions||[])]){if(!text)continue;const p=document.createElement('p');p.textContent=text;extra.append(p);}}
+ if(changedSite)root.querySelector('.era-map-detail').scrollTop=0;
+ for(const [id,b]of labels){b.dataset.active=String(id===(hover||selected));b.setAttribute('aria-pressed',String(id===selected));}
+}
+function updateInstruments(){
+ const tx=camera.target[0],tz=camera.target[2],ty=world.heightAt(tx,tz),center=project(tx,ty,tz),north=project(tx,ty,tz-5);
+ if(center&&north){const angle=Math.atan2(north.x-center.x,center.y-north.y),degrees=angle*180/Math.PI;compassNeedle.setAttribute('transform','rotate('+degrees+' 42 42)');for(const [key,offset]of [['n',0],['e',Math.PI/2],['s',Math.PI],['w',-Math.PI/2]]){const text=root.querySelector('.era-compass-'+key),a=angle+offset;text.setAttribute('x',String(42+Math.sin(a)*34));text.setAttribute('y',String(46-Math.cos(a)*34));}root.querySelector('.era-compass').dataset.northAngle=degrees.toFixed(2);}
+ const cx=width/2,cy=height*.52,left=floorPoint(cx-8,cy),right=floorPoint(cx+8,cy);if(!left||!right){scaleHost.hidden=true;return;}scaleHost.hidden=false;
+ const metresPerPixel=Math.hypot(right[0]-left[0],right[2]-left[2])*metres/16,ideal=metresPerPixel*100,power=10**Math.floor(Math.log10(ideal)),fraction=ideal/power,measure=(fraction>=5?5:fraction>=2?2:1)*power;
+ let lo=1,hi=Math.min(90,width*.23);for(let i=0;i<15;i++){const half=(lo+hi)/2,a=floorPoint(cx-half,cy),b=floorPoint(cx+half,cy);if(!a||!b){hi=half;continue;}const length=Math.hypot(b[0]-a[0],b[2]-a[2])*metres;if(length<measure)lo=half;else hi=half;}
+ const pixels=lo+hi;scaleHost.style.width=pixels+'px';scaleValue.textContent=measure>=1000?measure/1000+' 千米':measure+' 米';scaleHost.dataset.metres=measure;scaleHost.dataset.pixels=pixels.toFixed(3);scaleHost.setAttribute('aria-label','视图中心参考比例尺，'+measure+'米');
+}
+function positionTags(){for(const [element,point,y,title]of [[currentTag,currentSite,currentBase()+13,'当前'],[destinationTag,destination,targetBase()+13,'目的地']]){if(!point){element.hidden=true;continue;}const p=project(point.x,y,point.z);element.hidden=!p||p.x<0||p.x>width||p.y<0||p.y>height;if(element.hidden)continue;element.textContent=title+coordinateText(point.x,point.z);const w=element.offsetWidth;let x=p.x+6;if(x+w>width-8)x=p.x-w-8;element.style.left=Math.max(8,x)+'px';element.style.top=Math.max(16,Math.min(height-16,p.y))+'px';}}
+function positionLabels(){const bounds=stage.getBoundingClientRect(),used=[currentTag,destinationTag,root.querySelector('.era-map-instruments'),root.querySelector('.era-compass')].filter(el=>!el.hidden).map(el=>{const r=el.getBoundingClientRect();return{x:r.x-bounds.x+r.width/2,y:r.y-bounds.y+r.height/2,w:r.width,h:r.height};});for(const s of [...world.sites].sort((a,b)=>Number(b.id===input.currentId)-Number(a.id===input.currentId))){const label=labels.get(s.id);const p=project(s.x,(s.y??world.heightAt(s.x,s.z))+1.5,s.z);if(!p||p.x<0||p.x>width||p.y<0||p.y>height){label.hidden=true;continue;}label.hidden=false;const w=label.offsetWidth||150,h=label.offsetHeight||24,x=Math.max(w/2+8,Math.min(width-w/2-8,p.x)),low=h/2+8,high=height-h/2-8;let y=Math.max(low,Math.min(high,p.y+25)),best=null;const candidates=[y];for(let k=1;k<12;k++)candidates.push(y-k*(h+9),y+k*(h+9));for(const candidate of candidates){if(candidate<low||candidate>high)continue;if(!used.some(r=>Math.abs(r.x-x)<(r.w+w)/2+6&&Math.abs(r.y-candidate)<(r.h+h)/2+6)){best=candidate;break;}}if(best===null){label.hidden=true;continue;}y=best;label.style.left=x+'px';label.style.top=y+'px';used.push({x,y,w,h});}}
+function frame(){scheduled=false;resize();const changed=viewDirty;if(viewDirty)updateCamera();if(markerBufferDirty)updateMarkers();gl.viewport(0,0,canvas.width,canvas.height);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.BLEND);if(idDirty){gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);scene(true);gl.bindFramebuffer(gl.FRAMEBUFFER,null);idDirty=false;}if(mouse&&!drag){hover=pick(mouse.x,mouse.y);}gl.clearColor(...colour(settings.background),1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);scene(false);positionTags();positionLabels();if(changed)updateInstruments();showDetails();if(!ready){ready=true;root.dataset.ready='true';window.chrome?.webview?.postMessage({type:'ready'});}}
+function draw(){if(!scheduled){scheduled=true;requestAnimationFrame(frame);}}
+function persist(){if(selected)window.chrome?.webview?.postMessage({type:'select',id:selected});}
+for(const s of world.sites){const b=document.createElement('button');b.type='button';b.className='era-location cursor-interaction';b.textContent=siteTitle(s);b.setAttribute('aria-pressed',String(s.id===selected));b.addEventListener('mouseenter',()=>{mouse=null;hover=s.id;draw();});b.addEventListener('mouseleave',()=>{hover=0;draw();});b.addEventListener('focus',()=>{mouse=null;hover=s.id;draw();});b.addEventListener('blur',()=>{hover=0;draw();});b.addEventListener('click',()=>{selected=s.id;hover=s.id;status.textContent='正在查看'+s.name;persist();draw();});labelHost.append(b);labels.set(s.id,b);}
+destinationButton.addEventListener('click',()=>{const site=world.sites.find(s=>s.id===Number(destinationButton.dataset.siteId));if(!site||site.id===input.currentId)return;selected=site.id;destination={siteId:site.id,x:site.destinationX??site.x,z:site.destinationZ??site.z,markerHeight:site.markerHeight??.38};markerBufferDirty=true;hover=0;mouse=null;status.textContent='已标记'+site.name+'为目的地，仅预览位置。';persist();draw();});
+function local(e){const b=canvas.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top};}
+canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,yaw:camera.yaw,elevation:camera.elevation};moved=false;mouse=null;canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>4)moved=true;camera.yaw=drag.yaw-dx*.005;camera.elevation=Math.max(.38,Math.min(1.2,drag.elevation+dy*.004));viewDirty=true;hover=0;}else mouse=local(e);draw();});
+canvas.addEventListener('pointerup',e=>{const wasDrag=moved;drag=null;if(!wasDrag&&ready){const p=local(e),id=pick(p.x,p.y);if(id){selected=id;hover=id;status.textContent='正在查看'+world.sites.find(s=>s.id===id).name;}}if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);persist();draw();});
+canvas.addEventListener('pointercancel',()=>{drag=null;mouse=null;draw();});
+canvas.addEventListener('pointerleave',()=>{if(!drag){mouse=null;hover=0;draw();}});
+canvas.addEventListener('wheel',e=>{e.preventDefault();camera.distance=Math.max(90,Math.min(215,camera.distance*Math.exp(e.deltaY*.001)));viewDirty=true;mouse=null;draw();clearTimeout(canvas._saveTimer);canvas._saveTimer=setTimeout(persist,180);},{passive:false});
+new ResizeObserver(()=>{viewDirty=true;draw();}).observe(stage);
+root.style.fontFamily=input.fontFamily||'Microsoft YaHei UI';
+root.querySelector('.era-current').textContent='当前地点：'+(input.currentLocation||'尚未确认');
+let closed=false;function closeMap(){if(!closed){closed=true;window.chrome?.webview?.postMessage({type:'close'});}}
+root.querySelector('.era-return').addEventListener('click',closeMap);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='0'){e.preventDefault();closeMap();}});
+window.chrome?.webview?.addEventListener('message',e=>{const data=e.data;if(data?.type==='select'&&world.sites.some(s=>s.id===data.id)){selected=data.id;hover=0;mouse=null;draw();}else if(data?.type==='theme'&&data.palette){for(const key of ['background','foreground','focus'])if(/^#[0-9a-f]{6}$/i.test(data.palette[key]||''))settings[key]=data.palette[key];palette();draw();}});
+palette();draw();
+root._mapPreview={world,camera,settings,project,pick,floorPoint,coordinates,redraw(){viewDirty=true;draw();},select(id){selected=id;hover=0;mouse=null;draw();},get destination(){return destination?{...destination}:null;},get selected(){return selected;},get hover(){return hover;},get ready(){return ready;}};
+})();
+</script>
+
+</body></html>

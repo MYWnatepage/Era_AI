@@ -1,0 +1,93 @@
+{
+  "format_version": 1,
+  "items": [
+    {
+      "item_id": 1,
+      "name": "铜钥匙",
+      "old_description": "用于开启住宅门锁的铜制钥匙，两把钥匙具有相同用途。",
+      "description": "用于开启住宅门锁的铜制钥匙，两把钥匙具有相同用途。",
+      "old_attributes": "单位=把；用途=开启住宅门锁",
+      "attributes": "用途=开启住宅门锁"
+    },
+    {
+      "item_id": 2,
+      "name": "食材",
+      "old_description": "可用于准备饭食的食材，具体品种尚未限定。",
+      "description": "可用于准备饭食的食材。",
+      "old_attributes": "单位=份；用途=烹饪",
+      "attributes": "用途=烹饪"
+    },
+    {
+      "item_id": 3,
+      "name": "金币",
+      "old_description": "这个世界使用的金币，兑换规则由剧本卡定义。",
+      "description": "这个世界使用的货币。",
+      "old_attributes": "单位=枚；类别=货币；面额=金币",
+      "attributes": "类别=货币"
+    },
+    {
+      "item_id": 4,
+      "name": "银币",
+      "old_description": "这个世界使用的银币，兑换规则由剧本卡定义。",
+      "description": "这个世界使用的货币。",
+      "old_attributes": "单位=枚；类别=货币；面额=银币",
+      "attributes": "类别=货币"
+    },
+    {
+      "item_id": 5,
+      "name": "铜币",
+      "old_description": "这个世界使用的铜币，兑换规则由剧本卡定义。",
+      "description": "这个世界使用的货币。",
+      "old_attributes": "单位=枚；类别=货币；面额=铜币",
+      "attributes": "类别=货币"
+    },
+    {
+      "item_id": 6,
+      "name": "左轮手枪",
+      "old_description": "一把左轮手枪，具体型号、口径和当前装填情况未设定。",
+      "description": "一把使用转轮弹巢的手枪。",
+      "old_attributes": "单位=把；类别=武器；相关弹药编号=7",
+      "attributes": "类别=武器；相关弹药编号=7"
+    },
+    {
+      "item_id": 7,
+      "name": "子弹",
+      "old_description": "供左轮手枪使用的子弹，具体口径未设定。",
+      "description": "供左轮手枪使用的子弹。",
+      "old_attributes": "单位=发；类别=弹药；对应物品编号=6",
+      "attributes": "类别=弹药；对应物品编号=6"
+    },
+    {
+      "item_id": 8,
+      "name": "高碳钢长矛",
+      "old_description": "一把高碳钢长矛，可作为长柄武器使用。",
+      "description": "一把高碳钢长矛，可作为长柄武器使用。",
+      "old_attributes": "单位=把；类别=武器；材质=高碳钢",
+      "attributes": "类别=武器；材质=高碳钢"
+    },
+    {
+      "item_id": 9,
+      "name": "复合弓",
+      "old_description": "一把复合弓，具体型号未设定。",
+      "description": "一把借助滑轮组省力的弓。",
+      "old_attributes": "单位=把；类别=武器；相关箭矢编号=10",
+      "attributes": "类别=武器；相关箭矢编号=10"
+    },
+    {
+      "item_id": 10,
+      "name": "弓箭",
+      "old_description": "供弓使用的箭矢。",
+      "description": "供弓使用的箭矢。",
+      "old_attributes": "单位=支；类别=箭矢；对应物品编号=9",
+      "attributes": "类别=箭矢；对应物品编号=9"
+    },
+    {
+      "item_id": 11,
+      "name": "毽子",
+      "old_description": "艾拉拥有的一只毽子，可用于踢毽子游戏。",
+      "description": "艾拉拥有的一只毽子，可用于踢毽子游戏。",
+      "old_attributes": "单位=个；类别=玩具",
+      "attributes": "类别=玩具"
+    }
+  ]
+}

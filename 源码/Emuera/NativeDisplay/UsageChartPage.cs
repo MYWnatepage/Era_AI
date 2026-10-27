@@ -17,16 +17,20 @@ internal sealed class UsageChartPage
     internal bool Tokens { get; private set; }
     internal int Selected { get; private set; } = 6;
     private readonly Action close;
+    internal string ReturnLabel { get; }
+    internal string Notice { get; }
     private readonly List<(Rectangle Bounds, int Command)> links = [];
     private Rectangle plot;
     private Point? mouse;
     private bool completed;
 
-    internal UsageChartPage(UsagePoint[] days, Action close)
+    internal UsageChartPage(UsagePoint[] days, Action close, string returnLabel = "返回模型连接设置", string notice = "")
     {
         if (days.Length != 7) throw new ArgumentException("需要连续七天的统计记录。");
         Days = days;
         this.close = close;
+        ReturnLabel = returnLabel;
+        Notice = notice;
     }
 
     internal void Command(int number)
@@ -71,11 +75,12 @@ internal sealed class UsageChartPage
     {
         graphics.Clear(theme.BackgroundColor);
         links.Clear();
-        int line = Math.Max(1, Math.Min(lineHeight, Math.Max(1, area.Height / 20)));
+        int extra = Notice.Length > 0 ? 1 : 0;
+        int line = Math.Max(1, Math.Min(lineHeight, Math.Max(1, area.Height / (20 + extra))));
         using var font = new Font(original.FontFamily, Math.Max(1, original.Size * Math.Min(1f, (float)line / Math.Max(1, lineHeight))), original.Style, GraphicsUnit.Pixel);
         int x = Math.Max(8, line / 2), width = Math.Max(1, area.Width - x * 2);
-        int plotHeight = Math.Max(1, Math.Min(line * 8, area.Height - line * 11));
-        int y = Math.Max(0, area.Bottom - (plotHeight + line * 11));
+        int plotHeight = Math.Max(1, Math.Min(line * 8, area.Height - line * (11 + extra)));
+        int y = Math.Max(0, area.Bottom - (plotHeight + line * (11 + extra)));
         var accent = ColorSafety.Selection(theme);
         void Text(string value, Rectangle bounds, Color? color = null) => TextRenderer.DrawText(graphics, value, font, bounds,
             color ?? theme.TextColor, theme.BackgroundColor, TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine);
@@ -151,9 +156,10 @@ internal sealed class UsageChartPage
         y += plotHeight;
         Row(Tokens ? "仅统计已返回的 Token；取消或异常请求可能未计入。" : "实线：估算上限；虚线：下限。无记录或无法估算时留空，实际以账单为准。");
         Row(Details(Selected));
+        if (Notice.Length > 0) Row(Notice);
         Rule();
         Link("[1] 花费折线图", 1);
         Link("[2] Token 用量折线图", 2);
-        Link("[0] 返回模型连接设置", 0);
+        Link("[0] " + ReturnLabel, 0);
     }
 }

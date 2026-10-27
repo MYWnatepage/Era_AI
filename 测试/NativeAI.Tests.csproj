@@ -1,12 +1,42 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    <DefineConstants>$(DefineConstants);ERA_WEB_MAP_REFERENCE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../源码/Emuera/NativeDisplay/NarrativeDisplaySettings.cs" Link="NarrativeDisplaySettings.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/NarrativeDisplayEditor.cs" Link="NarrativeDisplayEditor.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/DiceGeometry.cs" Link="DiceGeometry.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/D20Animation.cs" Link="D20Animation.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/ActionNarrative.cs" Link="ActionNarrative.cs" />
+    <Compile Include="../源码/Emuera/Runtime/Utils/ScenarioSavePaths.cs" Link="ScenarioSavePaths.cs" />
+    <Compile Include="../源码/Emuera/Runtime/Utils/GameDirectoryLease.cs" Link="GameDirectoryLease.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/ScenarioCatalog.cs" Link="ScenarioCatalog.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/ActionRules.cs" Link="ActionRules.cs" />
+    <Compile Include="../源码/Emuera/Runtime/Utils/SaveStringCodec.cs" Link="SaveStringCodec.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/PromptBuilder.cs" Link="PromptBuilder.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/PromptSelection.cs" Link="PromptSelection.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/SceneContext.cs" Link="SceneContext.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/CharacterStatus.cs" Link="CharacterStatus.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/ReplyConsistency.cs" Link="ReplyConsistency.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/InventoryState.cs" Link="InventoryState.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/UsageChartButton.cs" Link="UsageChartButton.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/SceneMapPage.cs" Link="SceneMapPage.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/SceneMapDocument.cs" Link="SceneMapDocument.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/NativeSceneWorld.cs" Link="NativeSceneWorld.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/NativeMapRoute.cs" Link="NativeMapRoute.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/NativeMapTravel.cs" Link="NativeMapTravel.cs" />
+    <EmbeddedResource Include="../源码/Emuera/Assets/SceneMap/scene-map.html" LogicalName="EraAI.SceneMap.Document.html" />
+    <EmbeddedResource Include="../源码/Emuera/Assets/SceneMap/world.js" LogicalName="EraAI.SceneMap.World.js" />
+    <Compile Include="../源码/Emuera/NativeDisplay/SceneMapTerrain.cs" Link="SceneMapTerrain.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/MusicSpeakerButton.cs" Link="MusicSpeakerButton.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/MusicSettings.cs" Link="MusicSettings.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/MusicVolumeEditor.cs" Link="MusicVolumeEditor.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/WindowSettings.cs" Link="WindowSettings.cs" />
     <Compile Include="../源码/Emuera/NativeDisplay/DisplayTheme.cs" Link="DisplayTheme.cs" />
     <Compile Include="../源码/Emuera/NativeDisplay/GameColorEditor.cs" Link="GameColorEditor.cs" />
     <Compile Include="../源码/Emuera/NativeAI/AiSettings.cs" Link="AiSettings.cs" />
@@ -20,5 +50,23 @@
     <Compile Include="../源码/Emuera/NativeAI/GenerationSettings.cs" Link="GenerationSettings.cs" />
     <Compile Include="../源码/Emuera/NativeAI/ModelLimits.cs" Link="ModelLimits.cs" />
     <Compile Include="../源码/Emuera/NativeAI/GenerationPolicy.cs" Link="GenerationPolicy.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/NarrativeMemory.cs" Link="NarrativeMemory.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/ItemActions.cs" Link="ItemActions.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/ScenarioActions.cs" Link="ScenarioActions.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/LocalActionNarration.cs" Link="LocalActionNarration.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/SceneActionPresentation.cs" Link="SceneActionPresentation.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/SceneDescriptionMigrations.cs" Link="SceneDescriptionMigrations.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/CharacterOverview.cs" Link="CharacterOverview.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/CharacterProfiles.cs" Link="CharacterProfiles.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/StatusSemantics.cs" Link="StatusSemantics.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/FatiguePoints.cs" Link="FatiguePoints.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/FatigueDice.cs" Link="FatigueDice.cs" />
+    <Compile Include="../源码/Emuera/NativeDisplay/ResourceSlotMeter.cs" Link="ResourceSlotMeter.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/CharacterImportance.cs" Link="CharacterImportance.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/DynamicCharacters.cs" Link="DynamicCharacters.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/InventoryGrid.cs" Link="InventoryGrid.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/InventoryTextMigrations.cs" Link="InventoryTextMigrations.cs" />
+    <Compile Include="../源码/Emuera/NativeAI/ItemContextSelection.cs" Link="ItemContextSelection.cs" />
+    <None Update="Fixtures/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

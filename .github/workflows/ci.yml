@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build-and-test:
-    name: Windows build and core tests
+    name: Windows build, core and scenario tests
     runs-on: windows-latest
     timeout-minutes: 20
     env:
@@ -33,6 +33,6 @@ jobs:
       - name: Build Windows x64 player
         shell: pwsh
         run: ./构建.ps1
-      - name: Run core tests with simulated responses
+      - name: Run core and isolated scenario tests with simulated responses
         shell: pwsh
-        run: ./测试.ps1
+        run: ./测试.ps1 -Scenario
