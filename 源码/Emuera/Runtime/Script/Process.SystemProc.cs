@@ -1123,7 +1123,7 @@ internal sealed partial class Process
 	private bool writeSavedataTextFrom(int saveIndex)
 	{
 		EraDataResult result = vEvaluator.CheckData(saveIndex, EraSaveFileType.Normal);
-		console.Print(result.DataMes);
+		console.Print(MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.DisplayCaption(result.DataMes));
 		console.NewLine();
 		return result.State == EraDataState.OK;
 	}
@@ -1131,7 +1131,7 @@ internal sealed partial class Process
 	private bool writeSavedataTextFrom_Silent(int saveIndex)
 	{
 		EraDataResult result = vEvaluator.CheckData(saveIndex, EraSaveFileType.Normal);
-		//console.Print(result.DataMes);
+		//console.Print(MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.DisplayCaption(result.DataMes));
 		//console.NewLine();
 		return result.State == EraDataState.OK;
 	}

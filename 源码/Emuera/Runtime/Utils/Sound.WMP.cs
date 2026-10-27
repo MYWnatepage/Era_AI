@@ -5,6 +5,11 @@ namespace MinorShift.Emuera.Runtime.Utils;
 internal class Sound
 {
 	private WindowsMediaPlayer player = new();
+    public static void ValidateFile(string filename)
+    {
+        using var reader = System.IO.File.OpenRead(filename);
+        if (reader.Length < 12) throw new System.ArgumentException("Empty audio file.");
+    }
 	public void play(string filename, int repeat = 1)
 	{
 		player.URL = filename;

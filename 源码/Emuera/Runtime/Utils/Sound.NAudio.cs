@@ -347,6 +347,20 @@ namespace MinorShift.Emuera.Runtime.Utils
 			return volumeProvider.Read(buffer, offset, count);
 		}
 
+        public static void ValidateFile(string filename)
+        {
+            using WaveStream reader = filename.EndsWith(".wav", StringComparison.OrdinalIgnoreCase)
+                ? new WaveFileReader(filename)
+                : filename.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase)
+                    ? new VorbisWaveReader(filename)
+                    : new MediaFoundationReader(filename);
+            if (reader.WaveFormat.Channels is < 1 or > 2 || reader.Length <= 0)
+                throw new ArgumentException("Unsupported or empty audio file.");
+            var buffer = new float[reader.WaveFormat.Channels * 1024];
+            if (reader.ToSampleProvider().Read(buffer, 0, buffer.Length) == 0)
+                throw new ArgumentException("Empty audio file.");
+        }
+
 		public void play(string filename, int repeat = 1)
 		{
 			if (!SoundMixer.Initialized)

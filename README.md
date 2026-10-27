@@ -1,25 +1,27 @@
-# Era AI
+﻿# Era_AI
 
-**版本：0.2.1 Alpha · 开发测试版**
+**当前项目版本：0.3.0**
+
+> 0.3.0 已在本地项目中完成版本更新，详见[更新记录](更新记录.md)。下方下载链接保留对应历史发布包；发布包的内容以其 Release 说明为准，不代表已包含本地0.3.0的全部功能。
 
 [![CI](https://github.com/MYWnatepage/Era_AI/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/MYWnatepage/Era_AI/actions/workflows/ci.yml)
 
-[下载游戏](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha) · [使用说明](使用说明.md) · [常见问题](docs/FAQ.md) · [反馈问题](https://github.com/MYWnatepage/Era_AI/issues/new/choose) · [开发路线](docs/ROADMAP.md) · [更新日志](CHANGELOG.md)
+[历史发布下载](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha) · [使用说明](使用说明.md) · [常见问题](docs/FAQ.md) · [反馈问题](https://github.com/MYWnatepage/Era_AI/issues/new/choose) · [开发路线](docs/ROADMAP.md) · [更新日志](CHANGELOG.md)
 
-一个基于 Era / Emuera 的 AI 文字游戏实验项目。
+一个基于 Era / Emuera 的 AI 文字冒险项目。
 
-Era AI 希望把传统 Era 游戏的规则与进度管理，同 AI 对话的变化性结合起来：由剧本管理人物状态、物品与事件结果，让 AI 负责更自然的对话和场景表达。
+Era_AI 希望把传统 Era 游戏的规则与进度管理，同 AI 对话的变化性结合起来：由剧本管理人物状态、物品与事件结果，让 AI 负责更自然的对话和场景表达。
 
-目前提供「雨夜房间」测试剧本，用于验证自由输入、AI 回复、生成设置和存档流程。项目仍在持续开发，完整的卡片与事件系统尚未完成。
+当前项目提供「艾拉的奇幻冒险」示例剧本，支持自由输入、人物与物品管理、原生三维地图及路线移动、骰子判定、行动点与疲劳、长期记忆及存读档。框架同时提供模型连接、生成设置、用量记录和可调速的剧情显示，具体世界和玩法由剧本配置。
 
-![Era AI 主菜单界面示例](docs/images/main-menu.png)
+![Era_AI 主菜单界面示例](docs/images/main-menu.png)
 
 <details>
 <summary>查看设置界面示例</summary>
 
-![Era AI 设置界面示例](docs/images/settings.png)
+![Era_AI 设置界面示例](docs/images/settings.png)
 
-截图用于展示现有界面，设置值仅为示例。
+截图用于展示界面风格，可能来自较早版本；设置值仅为示例，以实际运行版本为准。
 
 </details>
 
@@ -27,11 +29,11 @@ Era AI 希望把传统 Era 游戏的规则与进度管理，同 AI 对话的变�
 
 前往 [Releases](https://github.com/MYWnatepage/Era_AI/releases) 下载游戏。
 
-当前版本：[Era AI 0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha)
+历史发布包：[Era_AI 0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha)。当前本地项目版本为0.3.0。
 
 | 版本 | 用途 |
 | --- | --- |
-| [0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha) | 当前推荐的开发测试版，运行包与源码提交对应 |
+| [0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha) | 保留的历史发布，运行包与对应源码提交一致 |
 | [0.2.0 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.0-alpha) | 保留的前一发布；其自动源码下载与运行包不对应，详见发布页更正 |
 | [测试版本V 1.0 历史清理版](https://github.com/MYWnatepage/Era_AI/releases/tag/legacy-v1.0-test) | 早期 Python Bridge 版本，仅作历史留存 |
 
@@ -41,7 +43,7 @@ Era AI 希望把传统 Era 游戏的规则与进度管理，同 AI 对话的变�
 
 发布包适用于 **Windows x64**，自带 .NET 运行环境，无需另外安装 .NET 或 Python。联网 AI 对话需要自行准备服务商提供的 API 密钥。
 
-> 请下载 Release 附件中的游戏压缩包。GitHub 自动生成的 `Source code` 压缩包不是可直接运行的游戏包。以下使用说明以 0.2.1 Alpha 发布包为准。
+> 请下载 Release 附件中的游戏压缩包。GitHub 自动生成的 `Source code` 压缩包不是可直接运行的游戏包。当前项目说明以0.3.0为准，历史发布包请查阅对应版本说明。
 
 ## 首次连接 AI
 
@@ -57,14 +59,18 @@ Era AI 希望把传统 Era 游戏的规则与进度管理，同 AI 对话的变�
 
 配置修改后自动保存。连接测试会发送生成请求，可能产生 Token 消耗；正常游玩中的 AI 回复也会产生相应消耗。
 
-## 当前功能
+## 当前开发功能（含未发布改动）
 
 ### 剧本与进度
 
-- 主菜单、剧本选择和「雨夜房间」测试剧本。
-- 玩家自由输入，AI 根据角色与当前对话生成回复。
-- 按剧本选择并读取存档，支持自动存档。
-- 测试剧本的 AI 历史随存档保存、恢复，新游戏从空历史开始。
+- 框架按剧本登记自动发现与调用；人物、行动及生存规则由剧本维护，存档按剧本编号分目录。新增剧本无需修改框架或重新构建，详见[剧本接入](docs/剧本接入.md)。
+- 「艾拉的奇幻冒险」独立剧本，作者维护初始人物卡、物品卡，并在剧本.json中统一维护剧本背景、开场与规则。
+- 自由输入、建议行动、每天一次 D20 狩猎和休息；时间用 8 个实心/空心方格显示，每天消耗 2 份食材。
+- 当前物品表保存数量、描述和归属，新增物品自动分配数字编号。
+- AI 返回剧情及物品提案；没有确定玩法规则的物品变化需先预览确认，取消不更新库存、时间或记忆。程序控制的狩猎和每日消耗自动结算。
+- 存档恢复物品、日期、狩猎状态与对话历史，新游戏从空历史开始；旧档按规则迁移。
+- 同一游戏目录只允许一个窗口运行，独立副本可分别运行，避免存档和活动记忆相互覆盖。
+- [剧本玩家说明](游戏/ERB/script/艾拉的奇幻冒险/剧本说明.md)与[作者维护说明](游戏/ERB/script/艾拉的奇幻冒险/说明.md)。
 
 ### 模型与生成设置
 
@@ -112,8 +118,9 @@ API 密钥使用 Windows DPAPI 加密保存，换电脑或 Windows 账户后需�
 
 ## 已知限制
 
-- 当前为 Alpha 开发测试版，功能及存档格式仍可能调整。
-- 本地大模型接入、人物卡、物品卡、流式输出及完整事件校验尚未完成。
+- 当前版本为0.3.0，后续更新仍会继续完善功能与存档兼容。
+- 场景移动和动态人物登记已接通；固定商店、自动找零及更丰富的事件规则仍待扩展。
+- 本地大模型接入与流式输出尚未完成；原生地图和骰子动画已接入。
 - 上下文裁剪使用估算，不能替代模型自身的精确分词。
 - 部分服务不提供模型容量信息；未获取到容量不代表模型无法使用。
 - 自动预算沿用服务或模型的默认行为，不保证低消耗。
@@ -123,10 +130,10 @@ API 密钥使用 Windows DPAPI 加密保存，换电脑或 Windows 账户后需�
 
 ## 后续方向
 
-- 用 ERB 组织人物、物品和场景资料，按需要加载相关内容。
-- 将确定的游戏状态与 AI 的文字表达进一步分开，完善事件结果校验。
-- 改进历史管理与资料检索，支持更长的剧本流程。
-- 完善本地模型接入，增加独立剧本并持续改进操作体验。
+- 继续完善本局人物、场景、NPC与事件的联动，让变化与叙事保持一致。
+- 为交易、装备使用及其他行动建立明确规则，逐步减少需要人工确认的物品提案。
+- 优化重要经历摘要和长期记忆的按需召回，支持长流程。
+- 继续做连续试玩与兼容测试；本地模型和流式输出作为后续扩展。
 
 以上为开发方向，不代表当前版本已经具备，也不承诺具体完成时间。
 
@@ -134,7 +141,7 @@ API 密钥使用 Windows DPAPI 加密保存，换电脑或 Windows 账户后需�
 
 创作者：**Natepage**。
 
-Era AI 基于 **Emuera.NET（EM+EE）** 修改。感谢 Emuera 及相关上游项目、依赖库的作者。
+Era_AI 基于 **Emuera.NET（EM+EE）** 修改。感谢 Emuera 及相关上游项目、依赖库的作者。
 
 运行器与各依赖的版权、许可归各自作者所有，相关原文随发布包保留在 `许可/` 文件夹中。 新增原创内容尚未选定统一的独立开源许可证，具体范围见 [LICENSE.md](LICENSE.md)。
 
@@ -149,13 +156,13 @@ Era AI 基于 **Emuera.NET（EM+EE）** 修改。感谢 Emuera 及相关上游�
 
 构建完成后运行 `游戏/EraAI.exe`。核心测试使用模拟响应，不需要 API 密钥，也不会调用真实模型。
 
-如需运行引擎集成测试，另外安装 Python 3，再执行 `./测试.ps1 -Engine`。测试在临时目录中使用独立游戏副本，不读取个人配置与存档。
+安装 Python 3 后，执行 `./测试.ps1 -Scenario` 可运行核心与重点剧本测试；`./测试.ps1 -Engine` 运行全部引擎集成测试。测试在临时目录中使用独立游戏副本，不读取个人配置与存档。
 
 仓库中的 `源码/` 保存修改后的运行器与上游许可，`游戏/CSV` 和 `游戏/ERB` 保存游戏数据与剧本，`测试/` 保存核心和引擎回归测试。可执行文件及自带运行环境的玩家包通过 Releases 提供。
 
 ## 仓库维护
 
-提交与 Pull Request 自动运行 Windows x64 构建和核心模拟测试，不使用真实 API 密钥。引擎集成测试与发布包检查按需要人工执行。
+工作流配置为提交与 Pull Request 运行 Windows x64 构建、核心模拟测试和重点剧本集成测试，不使用真实 API 密钥。全部界面测试和发布包检查仍需另外执行；本地修改的工作流需提交到仓库后才会在 GitHub 生效。
 
 - [贡献与提交流程](CONTRIBUTING.md)
 - [发布检查清单](docs/RELEASING.md)

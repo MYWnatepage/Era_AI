@@ -99,7 +99,7 @@ internal static class GenerationPolicy
         var selected = new List<ConversationTurn>();
         foreach (var turn in memory.Read(request.Scenario).TakeLast(p.HistoryTurns).Reverse())
         {
-            long size = (long)Estimate(turn.Player) + Estimate(turn.Reply);
+            long size = request.Inventory == null ? (long)Estimate(turn.Player) + Estimate(turn.Reply) : Estimate(PromptBuilder.HistoryEntry(turn));
             if (size > remaining) break;
             selected.Add(turn);
             remaining -= size;

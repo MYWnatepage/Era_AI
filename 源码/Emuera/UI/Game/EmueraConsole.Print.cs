@@ -1,4 +1,4 @@
-﻿using MinorShift.Emuera.Runtime.Config;
+using MinorShift.Emuera.Runtime.Config;
 using MinorShift.Emuera.Runtime.Script.Data;
 using MinorShift.Emuera.Runtime.Script.Statements;
 using MinorShift.Emuera.Runtime.Utils;
@@ -105,6 +105,10 @@ internal sealed partial class EmueraConsole : IDisposable
 	/// DRAWLINE用文字列
 	/// </summary>
 	string stBar;
+    string stBarPattern = "-";
+    int stBarWidth = -1;
+    string stBarFontName;
+    int stBarFontSize;
 
 	Stopwatch _drawStopwatch;
 	bool forceTextBoxColor;
@@ -593,6 +597,13 @@ internal sealed partial class EmueraConsole : IDisposable
 		return str;
 	}
 
+    internal void PrintContextItemButton(string str, string payload, bool selected)
+    {
+        if (string.IsNullOrEmpty(str)) return;
+        var style = Style;
+        style.ContextSelected = selected;
+        printBuffer.AppendButton(str, style, payload);
+    }
 	internal void PrintButton(string str, string p)
 	{
 		if (string.IsNullOrEmpty(str))
@@ -701,7 +712,7 @@ internal sealed partial class EmueraConsole : IDisposable
 		//	PrintFlush(false);
 		StringStyle ss = userStyle;
 		userStyle.FontStyle = FontStyle.Regular;
-		Print(stBar);
+		Print(getDefStBar());
 		userStyle = ss;
 	}
 
@@ -720,11 +731,21 @@ internal sealed partial class EmueraConsole : IDisposable
 
 	public string getDefStBar()
 	{
-		return stBar;
+        window.SyncWindowDrawingWidth();
+        if (stBarWidth != Config.DrawableWidth || stBarFontName != Config.FontName || stBarFontSize != Config.FontSize)
+        {
+            stBar = getStBar(stBarPattern);
+            stBarWidth = Config.DrawableWidth;
+            stBarFontName = Config.FontName;
+            stBarFontSize = Config.FontSize;
+        }
+        return stBar;
 	}
 
 	public string getStBar(string barStr)
 	{
+        window.SyncWindowDrawingWidth();
+        stringMeasure.RefreshTypography();
 		var builder = new StringBuilder();
 		builder.Append(barStr);
 		int width = 0;
@@ -744,7 +765,8 @@ internal sealed partial class EmueraConsole : IDisposable
 
 	public void setStBar(string barStr)
 	{
-		stBar = getStBar(barStr);
+        stBarPattern = string.IsNullOrEmpty(barStr) ? "-" : barStr;
+        stBarWidth = -1;
 	}
 	#endregion
 

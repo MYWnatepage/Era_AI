@@ -299,7 +299,7 @@ partial class MainWindow
 		// 
 		// folderSelectDialog
 		// 
-		folderSelectDialog.Description = "読み直すフォルダを選択してください";
+            folderSelectDialog.Description = "请选择要重新加载的文件夹";
 		// 
 		// richTextBox1
 		// 

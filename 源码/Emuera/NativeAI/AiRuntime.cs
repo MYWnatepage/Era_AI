@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ internal static class AiRuntime
     private static DateTimeOffset balanceTime;
     private static CancellationTokenSource pendingCancellation;
     private static Task<AiResult> pending;
+    internal static (int Roll, string Summary)? D20Presentation { get; private set; }
     private static Task<ModelCatalogResult> pendingModels;
     public static string[] Models { get; private set; } = [];
     public static AiSettings ModelsConnection { get; private set; }
@@ -30,14 +32,91 @@ internal static class AiRuntime
     internal static bool HistoryBusy => pending != null && !pending.IsCompleted;
     public static string LastText => last.Text;
     public static string LastWarning => last.Warning;
+    public static string LastInventory => last.InventorySnapshot;
+    public static string LastInventoryChanges => last.InventoryChanges;
+    public static string LastSuggestions => last.Suggestions;
+    public static bool LastRequiresApproval => last.RequiresApproval;
+    public static string LastRationale => last.Rationale;
+    private static InventoryExchange preparedInventory;
+    internal static ScenarioCatalog Catalog { get; private set; } = ScenarioCatalog.Load(System.IO.Path.Combine(Program.ExeDir, "ERB", "script"));
+    internal static ScenarioDefinition ActiveScenario { get; private set; }
+    internal static void ReloadCatalog() => Catalog = ScenarioCatalog.Load(System.IO.Path.Combine(Program.ExeDir, "ERB", "script"));
+    internal static ScenarioDefinition ActivateScenario(string id)
+    {
+        var entry = Catalog.Get(id);
+        if (ActiveScenario?.Id != id)
+        {
+            if (HistoryBusy) throw new InvalidOperationException("请等待当前对话完成后再切换剧本。");
+            preparedInventory = null;
+        }
+        MinorShift.Emuera.Runtime.Utils.ScenarioSavePaths.Select(entry.Id, entry.MatchesSave);
+        ActiveScenario = entry;
+        return entry;
+    }
+    internal static void PrepareInventory(string snapshot, ScenarioActionOutcome action = null)
+    {
+        if (Busy) throw new InvalidOperationException("请等待当前对话完成。");
+        preparedInventory = null;
+        if (ActiveScenario == null) throw new InvalidOperationException("请先选择已登记的剧本。");
+        var state = InventoryState.Read(snapshot);
+        state.BindOwners(ActiveScenario.Owners);
+        state.BindCharacters(ActiveScenario.Characters);
+        state.BindWorld(ActiveScenario);
+        if (action != null) action = action with { EndScene = state.ResolveActionScene(action.EndScene) };
+        preparedInventory = new(state.Snapshot(), Guid.NewGuid().ToString("N"), action, ActiveScenario.Id, ActiveScenario.InventoryInstruction,
+            SelectionRules: ActiveScenario.ContextSelection, Scenario: ActiveScenario);
+    }
+    internal static void PrepareSelectedItem(string snapshot, ItemActionSelection selection)
+    {
+        PrepareInventory(snapshot);
+        ItemActions.Prepare(InventoryState.Read(preparedInventory.Snapshot), selection, scenario: ActiveScenario);
+        preparedInventory = preparedInventory with { SelectedItem = selection };
+    }
+    internal static void PrepareContextItems(string snapshot, IEnumerable<int> selectedIds)
+    {
+        if (Busy) throw new InvalidOperationException("请等待当前对话完成。");
+        var previous = preparedInventory;
+        preparedInventory = null;
+        if (ActiveScenario == null) throw new InvalidOperationException("请先选择已登记的剧本。");
+        var state = InventoryState.Read(snapshot);
+        state.BindOwners(ActiveScenario.Owners);
+        state.BindCharacters(ActiveScenario.Characters);
+        state.BindWorld(ActiveScenario);
+        string current = state.Snapshot();
+        int[] selected = ItemContextSelection.Select(state, selectedIds);
+        if (previous != null && ItemContextSelection.Matches(previous, current, ActiveScenario.Id))
+            preparedInventory = ItemContextSelection.Attach(previous, selected);
+        else
+        {
+            PrepareInventory(current);
+            preparedInventory = ItemContextSelection.Attach(preparedInventory, selected);
+        }
+    }
+    internal static void PrepareContextItems(string snapshot, string csv)
+    {
+        var amounts = ItemContextSelection.ValidateAmounts(InventoryState.Read(snapshot), csv);
+        PrepareContextItems(snapshot, amounts.Keys);
+        preparedInventory = preparedInventory with { SelectedAmounts = amounts };
+    }
     public static void Start(AiRequest request)
     {
         if (Busy) throw new InvalidOperationException("已有对话正在生成，请等待或取消。");
+        if (preparedInventory != null)
+        {
+            var prepared = preparedInventory;
+            preparedInventory = null;
+            if (request.Scenario != prepared.ScenarioId) throw new InvalidOperationException("准备的物品状态不属于当前请求的剧本。");
+            request = request with { Inventory = prepared with { GameTime = request.GameTime } };
+        }
+        preparedInventory = null;
         var connection = Settings.Load();
         if (request.Scenario != "connection_test") request = request with { Parameters = Generation.Load(connection), Limits = GetModelLimits(connection) };
         pendingCancellation?.Dispose();
         pendingCancellation = new CancellationTokenSource();
         var token = pendingCancellation.Token;
+        D20Presentation = request.Inventory?.Action is { Sides: 20 } action ? (action.RawRoll > 0 ? action.RawRoll : action.Roll, action.Summary) :
+            request.Inventory?.SelectedItem is { Mode: "bandage", Roll: > 0 } selected
+                ? (selected.Roll, ItemActions.Prepare(InventoryState.Read(request.Inventory.Snapshot), selected, request.GameTime, request.Inventory.Scenario).RollSummary + " / 包扎效果判定") : null;
         pending = Task.Run(async () =>
         {
             try { return await Client.SendAsync(connection, request, token).ConfigureAwait(false); }

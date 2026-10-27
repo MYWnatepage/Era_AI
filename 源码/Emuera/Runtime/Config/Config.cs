@@ -13,6 +13,19 @@ namespace MinorShift.Emuera.Runtime.Config;
 
 internal static class Config
 {
+    public static void ApplyWindowSettings(int width, int height, bool maximized)
+    {
+        WindowX = width;
+        WindowY = height;
+        WindowMaximixed = maximized;
+        SizableWindow = true;
+        UpdateWindowDrawingWidth(width);
+    }
+    public static void UpdateWindowDrawingWidth(int width)
+    {
+        WindowX = width;
+        DrawableWidth = Math.Max(1, width - DrawingParam_ShapePositionShift);
+    }
 
     public static void ApplyTypography(string name, int size, int height)
     {
@@ -380,13 +393,19 @@ internal static class Config
 
 	public static List<KeyValuePair<string, string>> GetFiles(string rootdir, string pattern)
 	{
-		return getFiles(rootdir, rootdir, pattern, !SearchSubdirectory, SortWithFilename);
+		return getFiles(rootdir, rootdir, pattern, !SearchSubdirectory && !IsScriptDirectory(rootdir), SortWithFilename);
 	}
 
 	public static List<KeyValuePair<string, string>> GetFiles(string dir, string rootdir, string pattern)
 	{
-		return getFiles(dir, rootdir, pattern, !SearchSubdirectory, SortWithFilename);
+		return getFiles(dir, rootdir, pattern, !SearchSubdirectory && !IsScriptDirectory(rootdir), SortWithFilename);
 	}
+
+    // Scenario bundles under ERB/script must load independently of the legacy CSV/subfolder option.
+    private static bool IsScriptDirectory(string rootdir) => !string.IsNullOrEmpty(Program.ErbDir) && string.Equals(
+        Path.GetFullPath(rootdir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+        Path.GetFullPath(Program.ErbDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+        StringComparison.OrdinalIgnoreCase);
 
 	//KeyValuePair<相対パス, 完全パス>のリストを返す。
 	private static List<KeyValuePair<string, string>> getFiles(string dir, string rootdir, string pattern, bool toponly, bool sort)

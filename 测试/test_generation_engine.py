@@ -38,7 +38,11 @@ shutil.copytree(GAME_DIR, stage, dirs_exist_ok=True,
 shutil.copy2(GAME_EXE, stage / 'EraAI.exe')
 title = stage / 'ERB/SYSTEM_TITLE.ERB'
 text = title.read_text(encoding='utf-8-sig').replace('@SYSTEM_TITLE\n', '@SYSTEM_TITLE\nCALL GENERATION_ENGINE_TEST\nQUIT\n', 1)
-a, b = text.index('@TITLE_SETTING\n'), text.index('\n@INIT_DISPLAY_SETTINGS\n')
+title.write_text(text, encoding='utf-8-sig')
+title = stage / 'ERB/SYSTEM_SETTINGS.ERB'
+text = title.read_text(encoding='utf-8-sig')
+
+a, b = text.index('@TITLE_SETTING\n'), text.index('\n@PRINT_AUTOSAVE_NAME\n')
 text = text[:a] + text[a:b].replace('\nINPUT\n', '\nRESULT = 0\n', 1) + text[b:]
 title.write_text(text, encoding='utf-8-sig')
 menus = stage / 'ERB/SYSTEM_GENERATION.ERB'
@@ -101,7 +105,7 @@ CALL TITLE_SETTING
 LOCAL:0 = 0
 FOR LOCAL:1, 0, LINECOUNT
     LOCALS:0 '= GETDISPLAYLINE(LOCAL:1)
-    IF STRFIND(LOCALS:0, "[10] 采样设置") >= 0 || STRFIND(LOCALS:0, "[11] 回复长度") >= 0 || STRFIND(LOCALS:0, "[12] 上下文管理") >= 0 || STRFIND(LOCALS:0, "[13] 思考模式") >= 0
+    IF STRFIND(LOCALS:0, "[13] 采样设置") >= 0 || STRFIND(LOCALS:0, "[14] 回复长度") >= 0 || STRFIND(LOCALS:0, "[15] 上下文管理") >= 0 || STRFIND(LOCALS:0, "[16] 思考模式") >= 0
         LOCAL:0 += 1
     ENDIF
     IF STRFIND(LOCALS:0, "回复上限") >= 0 || STRFIND(LOCALS:0, "记忆容量") >= 0 || STRFIND(LOCALS:0, "对话风格") >= 0

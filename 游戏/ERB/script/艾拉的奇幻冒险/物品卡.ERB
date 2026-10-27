@@ -1,0 +1,150 @@
+﻿; 初始物品表：11 条记录，编号为数字；游玩中生成的新物品由后续当前世界维护。
+; 字段：0 编号，1 名称，2 描述，3 类型，4 属性，5 初始数量，6 归属，7 短摘要。
+; 类型固定：消耗品、普通物品、特殊物品。归属使用 player（主角）、ella（艾拉）。
+; 不设置初始位置。金币/银币/铜币只定义物品，汇率统一放在剧本卡。
+; 编号与 CASE 序号分开管理；数量返回为可转整数的字符串，不包含单位。
+; ARG=0 返回总数；ARG=1～11 返回一条记录，成功 RETURN 1，越界 RETURN 0。
+@RAIN_ROOM_INITIAL_ITEM, ARG
+#DIM ITEM_COUNT
+ITEM_COUNT = 11
+FOR LOCAL, 0, 8
+    RESULTS:LOCAL '= ""
+NEXT
+IF ARG == 0
+    RETURN ITEM_COUNT
+ENDIF
+IF ARG < 1 || ARG > ITEM_COUNT
+    RETURN 0
+ENDIF
+SELECTCASE ARG
+    ; 1：铜钥匙
+    CASE 1
+        RESULTS:0 '= "1"
+        RESULTS:1 '= "铜钥匙"
+        RESULTS:2 '= "用于开启住宅门锁的铜制钥匙，两把钥匙具有相同用途。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "用途=开启住宅门锁"
+        RESULTS:5 '= "2"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "开启住宅门锁的铜钥匙。"
+        RETURN 1
+    ; 2：食材
+    CASE 2
+        RESULTS:0 '= "2"
+        RESULTS:1 '= "食材"
+        RESULTS:2 '= "可用于准备饭食的食材。"
+        RESULTS:3 '= "消耗品"
+        RESULTS:4 '= "用途=烹饪"
+        RESULTS:5 '= "10"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "可用于做饭的食材。"
+        RETURN 1
+    ; 3：金币
+    CASE 3
+        RESULTS:0 '= "3"
+        RESULTS:1 '= "金币"
+        RESULTS:2 '= "这个世界使用的货币。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "类别=货币"
+        RESULTS:5 '= "2"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "金币。"
+        RETURN 1
+    ; 4：银币
+    CASE 4
+        RESULTS:0 '= "4"
+        RESULTS:1 '= "银币"
+        RESULTS:2 '= "这个世界使用的货币。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "类别=货币"
+        RESULTS:5 '= "36"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "银币。"
+        RETURN 1
+    ; 5：铜币
+    CASE 5
+        RESULTS:0 '= "5"
+        RESULTS:1 '= "铜币"
+        RESULTS:2 '= "这个世界使用的货币。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "类别=货币"
+        RESULTS:5 '= "81"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "铜币。"
+        RETURN 1
+    ; 6：左轮手枪
+    CASE 6
+        RESULTS:0 '= "6"
+        RESULTS:1 '= "左轮手枪"
+        RESULTS:2 '= "一把使用转轮弹巢的手枪。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "类别=武器；相关弹药编号=7"
+        RESULTS:5 '= "1"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "一把左轮手枪。"
+        RETURN 1
+    ; 7：子弹
+    CASE 7
+        RESULTS:0 '= "7"
+        RESULTS:1 '= "子弹"
+        RESULTS:2 '= "供左轮手枪使用的子弹。"
+        RESULTS:3 '= "消耗品"
+        RESULTS:4 '= "类别=弹药；对应物品编号=6"
+        RESULTS:5 '= "5"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "左轮手枪的子弹。"
+        RETURN 1
+    ; 8：高碳钢长矛
+    CASE 8
+        RESULTS:0 '= "8"
+        RESULTS:1 '= "高碳钢长矛"
+        RESULTS:2 '= "一把高碳钢长矛，可作为长柄武器使用。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "类别=武器；材质=高碳钢"
+        RESULTS:5 '= "1"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "一把高碳钢长矛。"
+        RETURN 1
+    ; 9：复合弓
+    CASE 9
+        RESULTS:0 '= "9"
+        RESULTS:1 '= "复合弓"
+        RESULTS:2 '= "一把借助滑轮组省力的弓。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "类别=武器；相关箭矢编号=10"
+        RESULTS:5 '= "1"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "一把复合弓。"
+        RETURN 1
+    ; 10：弓箭
+    CASE 10
+        RESULTS:0 '= "10"
+        RESULTS:1 '= "弓箭"
+        RESULTS:2 '= "供弓使用的箭矢。"
+        RESULTS:3 '= "消耗品"
+        RESULTS:4 '= "类别=箭矢；对应物品编号=9"
+        RESULTS:5 '= "3"
+        RESULTS:6 '= "player"
+        RESULTS:7 '= "供复合弓使用的箭矢。"
+        RETURN 1
+    ; 11：毽子
+    CASE 11
+        RESULTS:0 '= "11"
+        RESULTS:1 '= "毽子"
+        RESULTS:2 '= "艾拉拥有的一只毽子，可用于踢毽子游戏。"
+        RESULTS:3 '= "普通物品"
+        RESULTS:4 '= "类别=玩具"
+        RESULTS:5 '= "1"
+        RESULTS:6 '= "ella"
+        RESULTS:7 '= "艾拉的毽子。"
+        RETURN 1
+    CASEELSE
+        RETURN 0
+ENDSELECT
+RETURN 0
+
+; 对话兼容入口：初始表与当前世界还未接入，不把整张初始表每轮发给 AI。
+; 后续由当前世界按场景和行动挑选本轮相关物品。
+@RAIN_ROOM_ITEM_CARDS
+RESULTS:0 '= ""
+RETURN 0

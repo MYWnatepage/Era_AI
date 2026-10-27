@@ -32,6 +32,10 @@ shutil.copytree(GAME_DIR, stage, dirs_exist_ok=True,
 shutil.copy2(GAME_EXE, stage / 'EraAI.exe')
 title = stage / 'ERB/SYSTEM_TITLE.ERB'
 text = title.read_text(encoding='utf-8-sig').replace('@SYSTEM_TITLE\n', '@SYSTEM_TITLE\nCALL ACCOUNT_PAGE_TEST\nQUIT\n', 1)
+title.write_text(text, encoding='utf-8-sig')
+title = stage / 'ERB/SYSTEM_MODEL.ERB'
+text = title.read_text(encoding='utf-8-sig')
+
 a, b = text.index('@TITLE_SETTING_AI_MODEL_INFO\n'), text.index('\n@MODEL_SELECT_SOURCE\n')
 page = text[a:b].replace('ESCAPE 0\nINPUT', 'ESCAPE 0\nRESULT = 0')
 text = text[:a] + page + text[b:]

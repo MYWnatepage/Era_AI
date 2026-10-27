@@ -1,4 +1,4 @@
-﻿using MinorShift.Emuera.GameView;
+using MinorShift.Emuera.GameView;
 using MinorShift.Emuera.Runtime.Config;
 using MinorShift.Emuera.Runtime.Script;
 using MinorShift.Emuera.Runtime.Script.Statements;
@@ -23,6 +23,7 @@ namespace MinorShift.Emuera.Forms
 		public MainWindow(string[] args)
 		{
 			InitializeComponent();
+			LoadWindowSettings();
 			_args = args;
 
 			if (Program.DebugMode)
@@ -223,8 +224,14 @@ namespace MinorShift.Emuera.Forms
 
 		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
 		{
+            if (NarrativeKey(keyData)) return true;
+            if (NarrativeEditing) return base.ProcessCmdKey(ref msg, keyData);
             if (UsageChartKey(keyData)) return true;
             if (UsageChartActive) return base.ProcessCmdKey(ref msg, keyData);
+            if (SceneMapKey(keyData)) return true;
+            if (SceneMapActive) return base.ProcessCmdKey(ref msg, keyData);
+            if (MusicKey(keyData)) return true;
+            if (MusicVolumeEditing) return base.ProcessCmdKey(ref msg, keyData);
             if (secretInput != null)
             {
                 if (keyData is Keys.Enter or Keys.Escape) { SubmitSecretInput(keyData == Keys.Escape); return true; }
@@ -445,21 +452,10 @@ namespace MinorShift.Emuera.Forms
 								//	return;
 								break;
 							case SC_MAXIMIZE:
-								if (Screen.AllScreens.Length == 1)
-								{
-									MaximizedBounds = new Rectangle(Left, 0, Config.WindowX, Screen.PrimaryScreen!.WorkingArea.Height);
-								}
-								else
-								{
-									for (int i = 0; i < Screen.AllScreens.Length; i++)
-									{
-										if (Left >= Screen.AllScreens[i].Bounds.Left && Left < Screen.AllScreens[i].Bounds.Right)
-										{
-											MaximizedBounds = new Rectangle(Left - Screen.AllScreens[i].Bounds.Left, Screen.AllScreens[i].Bounds.Top, Config.WindowX, Screen.AllScreens[i].WorkingArea.Height);
-											break;
-										}
-									}
-								}
+                                    _isWidthLocked = false;
+                                    MinimumSize = Size.Empty;
+                                    MaximumSize = Size.Empty;
+                                    MaximizedBounds = Screen.FromControl(this).WorkingArea;
 								break;
 						}
 						break;
@@ -571,12 +567,25 @@ namespace MinorShift.Emuera.Forms
 			MinimumSize = new Size(Width, minimamY);
 			MaximumSize = new Size(Width, maximamY);
 			if (winMaximize)
-				WindowState = FormWindowState.Maximized;
+            {
+                _isWidthLocked = false;
+                MinimumSize = Size.Empty;
+                MaximumSize = Size.Empty;
+                MaximizedBounds = Screen.FromControl(this).WorkingArea;
+                WindowState = FormWindowState.Maximized;
+            }
 		}
 
 		private void mainPicBox_MouseMove(object sender, MouseEventArgs e)
 		{
+            if (narrativeEditor != null) { narrativeEditor.Move(e.Location); mainPicBox.Invalidate(); return; }
+            if (NarrativeActive) return;
+            contextItemPoint = e.Location;
+            if (MoveToolbarButtons(e.Location)) { sceneMap?.MouseLeave(); mainPicBox.Invalidate(); return; }
+            if (D20MouseMove(e.Location)) return;
             if (usageChart != null) { usageChart.Move(e.Location); mainPicBox.Invalidate(); return; }
+            if (sceneMap != null) { sceneMap.Move(e.Location); mainPicBox.Invalidate(); return; }
+			if (musicVolumeEditor != null) { musicVolumeEditor.Move(e.Location); mainPicBox.Invalidate(); return; }
 			if (gameColorEditor != null) { gameColorEditor.MoveMouse(e.Location); mainPicBox.Invalidate(); return; }
 			if (!Config.UseMouse)
 				return;
@@ -588,8 +597,12 @@ namespace MinorShift.Emuera.Forms
 		#region EE_AnchorのCB機能移植
 		private void mainPicBox_MouseClickCBCheck(object sender, MouseEventArgs e)
 		{
-            if (usageChart != null) return;
-			if (gameColorEditor != null) return;
+            if (NarrativeActive || NarrativeEditing || Environment.TickCount64 < ignoreNarrativeKeysUntil) return;
+            if (console?.SelectedString?.StartsWith("@item:", StringComparison.Ordinal) == true) return;
+            if (DiceAnimationActive) return;
+            if (IsToolbarButton(e.Location)) return;
+            if (usageChart != null || sceneMap != null) return;
+			if (gameColorEditor != null || musicVolumeEditor != null || Environment.TickCount64 < ignoreMusicClipboardUntil) return;
 			if (Config.CBUseClipboard)
 			{
 				if (e.Button == MouseButtons.Left) console.CBProc.Check(ClipboardProcessor.CBTriggers.LeftClick);
@@ -599,16 +612,27 @@ namespace MinorShift.Emuera.Forms
 
 		private void mainPicBox_MouseDoubleClickCBCheck(object sender, MouseEventArgs e)
 		{
-            if (usageChart != null) return;
-			if (gameColorEditor != null) return;
+            if (NarrativeActive || NarrativeEditing || Environment.TickCount64 < ignoreNarrativeKeysUntil) return;
+            if (DiceAnimationActive) return;
+            if (IsToolbarButton(e.Location)) return;
+            if (usageChart != null || sceneMap != null) return;
+			if (gameColorEditor != null || musicVolumeEditor != null || Environment.TickCount64 < ignoreMusicClipboardUntil) return;
 			if (Config.CBUseClipboard && e.Button == MouseButtons.Left) console.CBProc.Check(ClipboardProcessor.CBTriggers.DoubleLeftClick);
 		}
 		#endregion
 		bool changeTextbyMouse;
 		private void mainPicBox_MouseDown(object sender, MouseEventArgs e)
 		{
+            if (Environment.TickCount64 < ignoreNarrativeKeysUntil || NarrativeMouseDown(e)) return;
+            if (Environment.TickCount64 < ignoreUsageChartClicksUntil) return;
+            if (ClickUsageChartButton(e)) return;
+            if (ClickMusicSpeaker(e)) return;
+            if (D20MouseDown(e)) return;
+            if (sceneMap != null && usageChart == null) { if (e.Button == MouseButtons.Left) { sceneMap.MouseDown(e.Location); richTextBox1.Focus(); mainPicBox.Invalidate(); } return; }
+            if (AdjustContextItemMouse(e)) return;
             if (usageChart != null) { if (e.Button == MouseButtons.Left) { usageChart.MouseDown(e.Location); richTextBox1.Focus(); mainPicBox.Invalidate(); } return; }
             if (secretInput != null) { secretInput.Focus(); return; }
+			if (musicVolumeEditor != null) { if (e.Button == MouseButtons.Left) { mainPicBox.Capture = true; musicVolumeEditor.MouseDown(e.Location); richTextBox1.Focus(); mainPicBox.Invalidate(); } return; }
 			if (gameColorEditor != null) { if (e.Button == MouseButtons.Left) { mainPicBox.Capture = true; gameColorEditor.MouseDown(e.Location); richTextBox1.Focus(); mainPicBox.Invalidate(); } return; }
 			if (!Config.UseMouse)
 				return;
@@ -871,6 +895,7 @@ namespace MinorShift.Emuera.Forms
 		{
 			if (console == null)
 				return;
+			ResetSceneMap();
 			console.GotoTitle();
 		}
 
@@ -878,12 +903,17 @@ namespace MinorShift.Emuera.Forms
 		{
 			if (console == null)
 				return;
+			ResetSceneMap();
 			await console.ReloadErb();
 		}
 
 		private void mainPicBox_MouseLeave(object sender, EventArgs e)
 		{
+            if (narrativeEditor != null) { narrativeEditor.MouseLeave(); mainPicBox.Invalidate(); return; }
+            MoveToolbarButtons(new Point(-1, -1));
             if (usageChart != null) { usageChart.MouseLeave(); mainPicBox.Invalidate(); return; }
+            if (sceneMap != null) { sceneMap.MouseLeave(); mainPicBox.Invalidate(); return; }
+			if (musicVolumeEditor != null) { musicVolumeEditor.MouseLeave(); mainPicBox.Invalidate(); return; }
 			if (gameColorEditor != null) { gameColorEditor.MouseLeave(); mainPicBox.Invalidate(); return; }
 			if (Config.UseMouse)
 				console.LeaveMouse();
@@ -957,11 +987,19 @@ namespace MinorShift.Emuera.Forms
 
 		private void mainPicBox_Paint(object sender, PaintEventArgs e)
 		{
+            try
+            {
+            if (DrawNarrativeEditor(e.Graphics)) return;
+            if (DrawD20Animation(e.Graphics)) return;
             if (DrawUsageChart(e.Graphics)) return;
+            if (DrawSceneMap(e.Graphics)) return;
+			if (musicVolumeEditor != null) { musicVolumeEditor.Draw(e.Graphics, mainPicBox.ClientRectangle, richTextBox1.Font, NativeDisplay.DisplayRuntime.Current, Config.LineHeight); return; }
 			if (DrawDisplayEditor(e.Graphics)) return;
 			if (console == null)
 				return;
 			console.OnPaint(e.Graphics);
+            }
+            finally { DrawMusicSpeaker(e.Graphics); DrawUsageChartButton(e.Graphics); }
 		}
 
 		private void ログを保存するSToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1056,7 +1094,11 @@ namespace MinorShift.Emuera.Forms
 
 		private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
 		{
+            mainPicBox.MouseUp -= NarrativeMouseUp;
+            EndD20Animation();
 			NativeAI.AiRuntime.Cancel();
+            music?.Dispose();
+            musicSpeakerTip?.Dispose();
 			if (Config.UseKeyMacro)
 				KeyMacro.SaveMacro();
 			if (console != null)
@@ -1087,7 +1129,11 @@ namespace MinorShift.Emuera.Forms
 
 		void richTextBox1_MouseWheel(object? sender, MouseEventArgs e)
 		{
+            if (narrativeEditor != null) { narrativeEditor.Speed(NarrativeSettings.CharactersPerSecond + (e.Delta > 0 ? 5 : -5)); if (e is HandledMouseEventArgs narrativeWheel) narrativeWheel.Handled = true; mainPicBox.Invalidate(); return; }
+            if (DiceAnimationActive) { if (e is HandledMouseEventArgs diceWheel) diceWheel.Handled = true; return; }
             if (usageChart != null) { if (e is HandledMouseEventArgs chartWheel) chartWheel.Handled = true; return; }
+            if (sceneMap != null) { if (sceneMapNative == null) sceneMap.Wheel(mainPicBox.PointToClient(MousePosition), e.Delta); if (e is HandledMouseEventArgs mapWheel) mapWheel.Handled = true; mainPicBox.Invalidate(); return; }
+			if (musicVolumeEditor != null) { musicVolumeEditor.Set(musicVolumeEditor.Value + (e.Delta > 0 ? 10 : -10)); if (e is HandledMouseEventArgs volumeWheel) volumeWheel.Handled = true; mainPicBox.Invalidate(); return; }
 			if (gameColorEditor != null) { gameColorEditor.Wheel(mainPicBox.PointToClient(MousePosition), e.Delta); if (e is HandledMouseEventArgs handled) handled.Handled = true; mainPicBox.Invalidate(); return; }
 			//if (!Config.UseMouse)
 			//	return;
@@ -1152,7 +1198,10 @@ namespace MinorShift.Emuera.Forms
 
 		private void richTextBox1_TextChanged(object? sender, EventArgs e)
 		{
+            if (DiceAnimationActive) return;
             if (usageChart != null) return;
+            if (sceneMap != null) return;
+			if (musicVolumeEditor != null || NarrativeEditing || NarrativeActive) return;
 			if (gameColorEditor != null) { gameColorEditor.PreviewInput(richTextBox1.Text); mainPicBox.Invalidate(); return; }
 			if (console == null || console.IsInProcess)
 				return;
@@ -1203,7 +1252,14 @@ namespace MinorShift.Emuera.Forms
 
 		private void richTextBox1_KeyDown(object? sender, KeyEventArgs e)
 		{
+            if (NarrativeKey(e.KeyData)) { e.SuppressKeyPress = true; return; }
+            if (NarrativeEditing) return;
+            if (DiceAnimationActive) { if (e.KeyCode == Keys.Escape) CancelD20Request(); e.SuppressKeyPress = true; return; }
             if (UsageChartActive) { if (UsageChartKey(e.KeyData)) e.SuppressKeyPress = true; return; }
+            if (SceneMapActive) { if (SceneMapKey(e.KeyData)) e.SuppressKeyPress = true; return; }
+            if (AdjustContextItemKey(e)) return;
+            if (MusicKey(e.KeyData)) { e.SuppressKeyPress = true; return; }
+            if (MusicVolumeEditing) return;
 			if (DisplayEditorKey(e)) return;
             if (e.KeyCode == Keys.Escape) { e.SuppressKeyPress = true; richTextBox1.Clear(); console?.NavigateBack(); return; }
 			if (console == null)

@@ -17,7 +17,7 @@ for case in ['snapshot','auto','legacy','newgame']:
     title.write_text(title.read_text(encoding='utf-8-sig').replace('@SYSTEM_TITLE\n','@SYSTEM_TITLE\nCALL HISTORY_SYNC_ENGINE_TEST\nQUIT\n',1),encoding='utf-8-sig')
     flow=stage/'ERB/SYSTEM_SCENARIO_LOAD.ERB'
     expected='LEGACY_REPLY' if case=='legacy' else 'OLD_REPLY'
-    flow.write_text(flow.read_text(encoding='utf-8-sig').replace('CALL SCENARIO_TEST_RAIN_ROOM_START\nBEGIN TITLE',f'''AIMEMORY "rain_room"
+    flow.write_text(flow.read_text(encoding='utf-8-sig').replace('CALL SCENARIO_CALL_HOOK, 3\nBEGIN TITLE',f'''AIMEMORY "rain_room"
 IF STRFIND(RESULTS:0, "{expected}") < 0 || STRFIND(RESULTS:0, "FUTURE_REPLY") >= 0
     THROW AI历史没有随存档恢复
 ENDIF
