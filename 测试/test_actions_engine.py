@@ -24,12 +24,12 @@ for case, roll, gain in [('success', 20, 8), ('http_failure', 9, 3), ('invalid_o
                 if case != 'random': assert action['roll'] == roll
                 else: assert 1 <= action['roll'] <= 20
             ops = [] if case != 'invalid_ops' else [{'op': 'change_quantity', 'item_id': 2, 'owner': 'player', 'delta': 99, 'reason': '违规额外收益'}]
-            content = {'story': '你完成今天的狩猎，整理好所得后仍留在这片林地。' if len(requests) == 1 else '你独自沿着小路返回森林边的小屋，艾拉已经在家等候。',
-                       'turn_id': turn, 'base_revision': revision, 'inventory_ops': ops,
+            content = {'story': '你完成今天的狩猎，整理好所得后仍留在这片林地。' if len(requests) == 1 else '你在小屋中向艾拉讲起今天的狩猎。',
+                       'turn_id': turn, 'base_revision': revision, 'inventory_ops': ops, 'effort': 'none',
                        'suggestions': ['和艾拉聊聊今天的见闻', '整理物资', '回家休息'] if len(requests) == 1 else ['和艾拉聊聊']}
             if len(requests) == 2:
                 content['scene_update'] = dict(location='森林边的小屋', present_characters=['player', 'ella'],
-                    character_locations=dict(player='森林边的小屋', ella='森林边的小屋'), summary='两人在小屋中。', reason='主角本轮回家，艾拉在家等候。')
+                    character_locations=dict(player='森林边的小屋', ella='森林边的小屋'), summary='两人在小屋中交谈。', reason='两人在当前地点交谈。')
             body = json.dumps({'choices': [{'message': {'content': json.dumps(content)}, 'finish_reason': 'stop'}]}).encode()
             try:
                 self.send_response(200); self.send_header('Content-Type', 'application/json')
@@ -108,8 +108,26 @@ CALL RAIN_ROOM_HUNT
 IF FLAG:20 != 18 || TIME != 4 || GLOBAL:510 != 1
     THROW repeated hunt altered state
 ENDIF
-CALL RAIN_ROOM_RUN_INPUT, "我沿着小路回到家中，艾拉在家等我。"
-IF TIME != 5 || FLAG:20 != 18
+; Settle the return through the program movement bridge before ordinary dialogue.
+; Native drawn-route travel is covered separately; AI cannot move the player.
+FOR LOCAL:90, 0, 2
+    RESULTS:0 '= SAVESTR:61
+    RESULTS:1 '= STRFORM("{2 - LOCAL:90}")
+    RESULTS:2 '= STRFORM("{DAY}")
+    RESULTS:3 '= STRFORM("{TIME}")
+    AICONNECTION 105
+    IF RESULT < 0
+        THROW program return route failed
+    ENDIF
+    SAVESTR:61 '= RESULTS:0
+    LOCAL:91 = TOINT(RESULTS:2)
+    CALL RAIN_ROOM_ADVANCE_TIME, LOCAL:91
+NEXT
+IF TIME != 6
+    THROW program return route cost incorrect
+ENDIF
+CALL RAIN_ROOM_RUN_INPUT, "我和艾拉谈谈今天的狩猎。"
+IF TIME != 7 || FLAG:20 != 18
     THROW ordinary dialogue did not cost one tick
 ENDIF
 RESULTS:0 '= SAVESTR:61

@@ -11,7 +11,9 @@ class Handler(BaseHTTPRequestHandler):
         requests.append(request)
         assert all(word not in system for word in ['rain_room', '艾拉', 'ella', '食材', '狩猎'])
         context = structured_context(request)
-        assert 'captain' in context['owners'] and 'vault' in context['owners']
+        assert context['owners'].get('captain') == '舰长'
+        assert 'vault' not in context['owners'], 'unrelated storage must stay outside the turn context'
+        assert [item['id'] for item in context['inventory']['items']] == [7]
         turn = context['turn_id']
         revision = int(context['base_revision'])
         reply = dict(story='舰长收好了晶体。', turn_id=turn, base_revision=revision,
@@ -143,19 +145,19 @@ IF RESULT < 0 || RESULTS:1 != "1"
     THROW item two implicitly treated as food
 ENDIF
 RESULTS:0 '= SAVESTR:61
-RESULTS:1 '= "inspect reactor"
+RESULTS:1 '= "检查晶体"
 AICONNECTION 34
 IF RESULT < 0
     THROW other scenario inventory prepare failed
 ENDIF
-AISTART "轨道站维修记录", "inspect reactor", "wrong_id", "shift 1", 1024, 0, ""
+AISTART "轨道站维修记录", "检查晶体", "wrong_id", "shift 1", 1024, 0, ""
 IF RESULT != -1
     THROW prepared state attached to another scenario
 ENDIF
 RESULTS:0 '= SAVESTR:61
-RESULTS:1 '= "inspect reactor"
+RESULTS:1 '= "检查晶体"
 AICONNECTION 34
-AISTART "轨道站维修记录", "inspect reactor", "orbital", "shift 1", 1024, 0, ""
+AISTART "轨道站维修记录", "检查晶体", "orbital", "shift 1", 1024, 0, ""
 IF RESULT != 0
     THROW second scenario cannot start model request
 ENDIF
@@ -185,7 +187,7 @@ IF RESULT < 0 || RESULTS:1 != "7"
 ENDIF
 RESULTS:1 '= "orbital"
 RESULTS:2 '= "shift 1"
-RESULTS:3 '= "inspect reactor"
+RESULTS:3 '= "检查晶体"
 RESULTS:4 '= LOCALS:0
 AICONNECTION 22
 AIMEMORY "orbital"
