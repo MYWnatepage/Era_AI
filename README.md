@@ -14,10 +14,10 @@ Era_AI 是基于 Era / Emuera 的 AI 文字冒险项目。框架负责交互、�
 
 ## 下载与启动
 
-- [历史游戏包：0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha)：下载附件 `Era-AI-v0.2.1-alpha-win-x64.zip`，完整解压后运行 `EraAI.exe`。Windows x64 玩家包自带运行环境，无需另外安装 .NET 或 Python。
+- [当前游戏包：0.3.0 清理版](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.3.0-clean)：下载附件 `Era-AI-v0.3.0-win-x64.zip`，完整解压后运行 `游戏/EraAI.exe`。Windows x64 玩家包自带运行环境，无需另外安装 .NET 或 Python。
 - **当前0.3.0源码**：需要 Windows x64、.NET 10 SDK 和 PowerShell，在仓库根目录运行 `./构建.ps1`，再启动 `游戏/EraAI.exe`。开发与验证流程见[开发说明](docs/开发说明.md)。
 
-0.2.1是历史发布包，不包含当前0.3.0的全部功能。GitHub自动生成的 `Source code` 压缩包是源码，不是可直接运行的游戏包；其他历史版本以各自的 [Release说明](https://github.com/MYWnatepage/Era_AI/releases)为准。
+GitHub自动生成的 `Source code` 压缩包是源码，不是可直接运行的游戏包。[0.2.1 Alpha](https://github.com/MYWnatepage/Era_AI/releases/tag/v0.2.1-alpha)仍作为历史版本保留；各版本附件以对应的 [Release说明](https://github.com/MYWnatepage/Era_AI/releases)为准。
 
 首次游玩请进入「设置 → 模型连接设置」，填写服务地址和API密钥、读取模型列表并测试连接，详细步骤见[使用说明](使用说明.md)。连接测试和AI生成可能产生费用。
 
